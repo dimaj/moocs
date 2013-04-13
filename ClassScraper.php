@@ -8,7 +8,7 @@
 
 require_once("scrapers/canvas.php");
 require_once("scrapers/udacity.php");
-// require_once("lib/database.php");
+require_once("config/config.php");
 
 // create list of scrapers
 $scrapers = array(new Udacity(), new Canvas());
