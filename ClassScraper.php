@@ -10,6 +10,8 @@ require_once("scrapers/canvas.php");
 require_once("scrapers/udacity.php");
 require_once("config/config.php");
 
+date_default_timezone_set("America/Los_Angeles");
+
 // create list of scrapers
 $scrapers = array(new Udacity(), new Canvas());
 

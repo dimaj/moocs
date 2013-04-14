@@ -23,8 +23,10 @@ class Canvas {
 		// loop through classes on the site
 		foreach ($site->find('div[class=block-box no-pad featured-course-outer-container]') as $class) {
 			$basic = $this->getBasicClassInfo($class);
+
 			$detailed = $this->getDetailedDescription($basic["link"]);
 			$classInfo = array_merge($basic, $detailed);
+			
 			array_push($classes, $classInfo);
 		}
 		
@@ -58,11 +60,11 @@ class Canvas {
 		$title = $top->find('div.course-detail-info h2', 0)->text();
 		
 		// start and end dates
-// 		$startDate = $this->getStartDate($top);
-// 		$endDate = $this->getEndDate($top);
+		$startDate = $this->getStartDate($top);
+		$endDate = $this->getEndDate($top);
 
 		// get price of this class
-// 		$price = $this->getClassPrice($top);
+		$price = $this->getClassPrice($top);
 
 		// get full class description
 		$description = $this->getFullDescription($bottom);
@@ -75,16 +77,21 @@ class Canvas {
 		
 		$category = $this->getClassCategory($class);
 		
+		$isFull = $this->getClassStatus($top);
+		
+		$duration = $this->getClassDuration($startDate, $endDate);
 		$retVal = array(
 			"title" => $title,
 			"classImageURL" => $imageURL,
-// 			"startDate" => $startDate,
-// 			"endDate" => $endDate,
-// 			"price" => $price,
+			"startDate" => $startDate,
+			"endDate" => $endDate,
+			"price" => $price,
 			"longDesc" => $description,
 			"profName" => $profName,
 			"profImage" => $profImage,
-			"category" => $category			
+			"category" => $category,
+			"status" => $isFull,
+			"duration" => $duration
 		);
 		
 		return $retVal;
@@ -95,13 +102,21 @@ class Canvas {
 	}
 	
 	private function getProfName($root) {
-		$instructor = $root->find('div[class=instructor-bio] h3[class=last emboss-light]', 0)->text();
-		return $instructor;
+		$name = $root->find('div[class=instructor-bio] h3[class=last emboss-light]', 0);
+		if (!$name) {
+			return null;
+		}
+		
+		return $name->text();
 	}
 	
 	private function getProfImage($root) {
-		$image = $root->find('div[class=instructor-bio] img', 0)->getAttribute('src');
-		return $this->url . $image;
+		$image = $root->find('div[class=instructor-bio] img', 0);
+		if (!$image) {
+			return null;
+		}
+		
+		return $this->url . $image->getAttribute('src');
 	}
 	
 	private function getFullDescription($root) {
@@ -113,9 +128,33 @@ class Canvas {
 		return trim($longDesc);
 	}
 	
+	private function getDatePriceBlock($root) {
+		$block = $root->find('div.course-detail-info', 0);
+		$block = $block->find('p', 0);
+		$block = $block->find('strong');
+		
+		$block = $root->find('div.course-detail-info h4', 0);
+		$block = $block->next_sibling();
+		$block = $block->find('strong');
+		
+		return $block;
+	}
+	
 	private function getClassPrice($root) {
-		$price = $root->find('div.course-detail-info p strong', 2)->text();
-		return $price;
+		$price = $this->getDatePriceBlock($root);
+		$retVal = "";
+		if (count($price) === 3) {
+			$retVal = $price[2]->text();
+		}
+		else {
+			$retVal = $price[1]->text();
+		}
+		return $retVal;
+	}
+	
+	private function getClassStatus($root) {
+		$status = $root->find('div.course-detail-info p[class=pad-box-micro center-box corner-box bevel-box alert-box corner-box emboss-light] strong', 0);
+		return ($status) ? "Full" : "Available";
 	}
 	
 	private function getClassImageURL($root) {
@@ -130,24 +169,54 @@ class Canvas {
 	}
 	
 	private function getStartDate($root) {
-		// start and end dates
-		$startDate = $root->find('div.course-detail-info p strong', 0)->text();
-		if (!startDate) {
-			return null;
+		$block = $this->getDatePriceBlock($root);
+
+		$date = $block[0]->text();
+		$pos = strpos($date, "available");
+		if ($pos !== false) {
+			// remove everything before 'available' including 'available'
+			$date = substr($date, $pos + strlen("available"));
 		}
-		$startDate = DateTime::createFromFormat("M d, Y+", $startDate)->format("Y-m-d");
-		return $startDate;
+		
+		$retVal = $this->formatDate(trim($date));
+		return $retVal;
+	}
+	
+	private function formatDate($dateStr) {
+		// make sure that date is in correct format
+		preg_match( '/(\w+)\s*([0-9]{1,2}),\s*([0-9]{4})/', $dateStr, $match);
+		if (count($match) === 4) {
+			$dateStr = $match[1] . " ";
+			$dateStr .= (strlen($match[2]) === 1) ? ("0".$match[2]) : $match[2];
+			$dateStr .= ", " . $match[3];
+			$retVal = DateTime::createFromFormat("M d, Y+", $dateStr)->format("Y-m-d");
+			return $retVal;
+		}
+		return null;
 	}
 	
 	private function getEndDate($root) {
+		$block = $this->getDatePriceBlock($root);
 		// start and end dates
-		$endDate = $root->find('div.course-detail-info p strong', 1)->text();
-		if (!endDate) {
+		if (count($block) === 3) {
+			$date = trim($block[1]->text());
+			$retVal = $this->formatDate($date);
+			return $retVal;
+		}
+		
+		return null;
+	}
+
+	private function getClassDuration($start, $end) {
+		if (!$start || !$end) {
 			return null;
 		}
-
-		$endDate = DateTime::createFromFormat("M d, Y+", $endDate)->format("Y-m-d");
-		return $endDate;
+		
+		$start = DateTime::createFromFormat("Y-m-d", $start);
+		$end = DateTime::createFromFormat("Y-m-d", $end);
+		$diff = $start->diff($end);
+		$diff = round($diff->format("%R%a") / 7);
+		return $diff;
 	}
 }
 
