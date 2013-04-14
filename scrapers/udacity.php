@@ -6,6 +6,7 @@
 class Udacity {
 	function __construct() {
 		$this->url = "https:/www.udacity.com";
+		$this->scraperName = "Udacity";
 		print "Class Udacity has been created.\n";
 	}
 	

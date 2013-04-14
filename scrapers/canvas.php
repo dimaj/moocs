@@ -13,6 +13,7 @@ include('lib/simple_html_dom.php');
 class Canvas {
 	function __construct() {
 		$this->url = "https://www.canvas.net";
+		$this->scraperName = "Canvas";
 	}
 	
 	function scrape($classes) {
@@ -95,7 +96,8 @@ class Canvas {
 			"profImage" => $profImage,
 			"category" => $category,
 			"status" => $isFull,
-			"duration" => $duration
+			"duration" => $duration,
+			"video_link" => ""
 		);
 		
 		return $retVal;

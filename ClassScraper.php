@@ -9,29 +9,36 @@
 require_once("scrapers/canvas.php");
 require_once("scrapers/udacity.php");
 require_once("config/config.php");
+require_once("lib/database.php");
+
+global $database;
 
 date_default_timezone_set("America/Los_Angeles");
 
 // create list of scrapers
 $scrapers = array(new Udacity(), new Canvas());
+$database = new Database($database);
 
 $classes = parseClasses($scrapers);
 
-updateDatabase($classes);
+$database->updateClasses($classes);
 
 function parseClasses($scrapers) {
 	$classInfo = array();
 	
-	for ($i = 0; $i < count($scrapers); $i++) {
-		$curScraper = $scrapers[$i];
-		$result = $curScraper->scrape(&$classes);
+	foreach ($scrapers as $scraper) {
+		if ($scraper->scraperName === "Udacity") {
+			print "Udacity... skipping....\n";
+			continue;
+		}
+		$result = $scraper->scrape(&$classes);
 		if ($result) {
-			print "Found " . count($classes) . " classes\n";	
 			$classInfo = array_merge($classInfo, $classes);
 		}
 		else {
 			// there was an error
 		}
+		
 	}
 	
 	print "Total of " . count($classInfo) . " has been scraped.\n";
