@@ -55,7 +55,7 @@ class Database {
 			$query1 .= ",'" . mysql_real_escape_string($class["site"]) . "'";
 			$query1 .= ")";
 
-			$query2 = "INSERT INFO coursedetails VALUES ";
+			$query2 = "INSERT INTO coursedetails VALUES ";
 			$query2 .= "(";
 			$query2 .= "DEFAULT,'" . mysql_real_escape_string($class['profName']) . "'";
 			$query2 .= ",'" . mysql_real_escape_string($class['profImage']) . "'";
