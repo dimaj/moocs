@@ -1,7 +1,11 @@
 <?php
-/*
-	This class is responsible for scraping class information
-	from Udacity.com
+/* 
+   File   : canvas.php
+   Subject: CS160 MOOCs mashup
+   Authors: Dmitry Jerusalimsky
+   Version: 1.0
+   Date   : Apr 12, 2013
+   Description: Scrapes class information from Canvas.net
  */
 
 include('lib/simple_html_dom.php');
