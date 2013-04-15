@@ -4,7 +4,14 @@ moocs
 Moocs project for CS160
 
 
-to run this project locally, navigate to the folder where ClassScraper.php is and type
+To run this project locally, modify config.php file to reflect your database configuration.
+
+Once config.php is updated, execute
+
 ```php ClassScraper.php```
 
+from command line.
+
 The app will do the rest!
+
+Navigate to the phpMyAdmin to see the results.

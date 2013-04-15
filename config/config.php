@@ -6,10 +6,9 @@
  	and other global settings
  */
 
-$database = array(
-	"host" => "",
-	"user" => "",
-	"pass" => "",
-	"db" => ""
+$GLOBALS['db'] = array(
+	"host" => "ip of the server, where mysql is installed",
+	"user" => "username that has access to the database",
+	"pass" => "password for that user",
+	"db" => "name of the database, where data is stored"
 );
-
