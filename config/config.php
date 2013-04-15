@@ -28,5 +28,3 @@ $GLOBALS['scrapers']['udacity']  = array(
 	"mainSearchString" => "li data-ng-show=isCourseShown(\'[^A-Za-z0-9]\')",
 	"name" => "Udacity"
 );
-
-print "There are " . count($GLOBALS['scrapers']) . " scrapers found\n";
