@@ -32,6 +32,10 @@ class Udacity {
 		foreach ($site->find('li data-ng-show=isCourseShown(\'[^A-Za-z0-9]\')') as $class) 
                     {
                     print  $counter++ . "\n";
+                    foreach($class->find('a') as $course)
+                    {
+                        print $course->href . "\n";
+                    }
                     //print $class->find('a',0)->getAttribute('href');
                         //$basic = $this->getBasicClassInfo($class, $site);
 
