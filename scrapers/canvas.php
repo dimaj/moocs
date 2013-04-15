@@ -17,10 +17,10 @@ class Canvas extends Scraper{
 		Constructor of this class.
 		param $classSearchStr Search string that separates each class from the main page
 	*/
-	function __construct($classSearchStr) {
+	function __construct($name, $website, $classSearchStr) {
 		parent::__construct();
-		$this->url = "https://www.canvas.net";
-		$this->scraperName = "Canvas";
+		$this->url = $website;
+		$this->scraperName = $name;
 		$this->mainPageSearchStr = $classSearchStr;
 	}
 	

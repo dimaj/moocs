@@ -11,10 +11,10 @@
  * 
  */
 class Udacity extends Scraper {
-	function __construct($classSearchStr) {
+	function __construct($name, $website, $classSearchStr) {
 		parent::__construct();
-		$this->url = "https://www.udacity.com/courses";
-		$this->scraperName = "Udacity";
+		$this->url = $website;
+		$this->scraperName = $name;
 		$this->mainPageSearchStr = $classSearchStr;
 	}
 	

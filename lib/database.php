@@ -7,7 +7,7 @@
    Description: Updates database with latest class information
 */
 
-require("config/config.php");
+// require_once("config/config.php");
 
 class Database {
 	/**

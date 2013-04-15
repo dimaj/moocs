@@ -9,17 +9,29 @@
 require_once("scrapers/Scraper.php");
 require_once("scrapers/canvas.php");
 require_once("scrapers/udacity.php");
+require_once("config/config.php");
 
 date_default_timezone_set("America/Los_Angeles");
 
 // create list of scrapers
-$scrapers = array(
-	new Canvas("div[class=block-box no-pad featured-course-outer-container]"),
-	new Udacity("li data-ng-show=isCourseShown(\'[^A-Za-z0-9]\')")
-);
+if (!isset($GLOBALS['scrapers'])) {
+	die ("At least one scraper must be defined.");
+}
+
+$addedScrapers = array();
+
+foreach ($GLOBALS['scrapers'] as $scraper) {
+	$class = $scraper['className'];
+	$searchString = $scraper['mainSearchString'];
+	$website = $scraper['mainURL'];
+	$name = $scraper['name'];
+	
+	$scraperObj = new $class($name, $website, $searchString);
+	array_push($addedScrapers, $scraperObj);
+}
 
 // iterate over the scrapers and scrape data
-foreach ($scrapers as $scraper) {
+foreach ($addedScrapers as $scraper) {
 	$scraper->scrape();
 }
 	
