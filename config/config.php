@@ -8,6 +8,7 @@
 
 $GLOBALS['db'] = array(
 	"host" => "ip of the server, where mysql is installed",
+	"port" => "3306",
 	"user" => "username that has access to the database",
 	"pass" => "password for that user",
 	"db" => "name of the database, where data is stored"
@@ -25,6 +26,6 @@ $GLOBALS['scrapers']['canvas'] = array(
 $GLOBALS['scrapers']['udacity']  = array(
 	"className" => "Udacity",
 	"mainURL" => "https://www.udacity.com/courses",
-	"mainSearchString" => "li data-ng-show=isCourseShown(\'[^A-Za-z0-9]\')",
+	"mainSearchString" => "ul[id=unfiltered-class-list] li",
 	"name" => "Udacity"
 );

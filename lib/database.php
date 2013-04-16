@@ -33,8 +33,15 @@ class Database {
 		Connects to the database and selects a database
 	*/
 	private function connectDB() {
+		$host = "";
+		if (isset($GLOBALS['db']['port'])) {
+			$host = "{$GLOBALS['db']['host']}:{$GLOBALS['db']['port']}";
+		}
+		else {
+			$host = "{$GLOBALS['db']['host']}:3306";
+		}
 		// connect to database
-		$this->conn = @mysql_connect($GLOBALS['db']['host'], $GLOBALS['db']['user'], $GLOBALS['db']['pass'])
+		$this->conn = @mysql_connect($host, $GLOBALS['db']['user'], $GLOBALS['db']['pass'])
 			or die ("Could not connect to host '" . $GLOBALS['db']['host'] . "'.\n");
 		mysql_select_db($GLOBALS['db']['db'])
 			or die ("Could not select database '" . $GLOBALS['db']['db'] . ".\n");
