@@ -14,12 +14,14 @@ class Udacity extends Scraper {
 	function __construct($name, $website, $classSearchStr) {
 		parent::__construct();
 		$this->url = $website;
-		$this->scraperName = $name;
+		$this->siteName = $name;
 		$this->mainPageSearchStr = $classSearchStr;
+		$this->baseURL = $this->getBaseURL($website);
 	}
 	
 	function getClassInfo($class, $classInfoObj) {
-		return $this->createSampleData();
+		$this->getBasicClassInfo($class, &$classInfoObj);
+		$this->getDetailedDescription(&$classInfoObj);
 	}
 	
 	function createSampleData() {
@@ -68,71 +70,54 @@ class Udacity extends Scraper {
 		return $classes;
 	}
         
-    private function getBasicClassInfo($class, $site) {
-		$link  = $class->childNodes(0)->getAttribute('href');
-        print $link . "\n";
-		$shortDesc = $class->find('div class="crs-li-text"', 0)->text();
-	
-		$retVal = array(
-			"link" => trim($link),
-			"shortDesc" => trim($shortDesc),
-			"site" => "Udacity"
-		);
+    private function getBasicClassInfo($class, $classInfo) {
+		//TODO: need to figure out why this does not work right now
+    	$style = $class->getAttribute('style');
+    	if ($style && ($style === "display: none'")) {
+    		$classInfo = null;
+    		print "Exiting out.\n";
+    		return;
+    	}
+    	
+    	$link = $class->find('a', 0)->getAttribute('href');
 
-        print "message" . $retVal[0] . "\n";
+		$thumbnail = $class->find('div[class=crs-li-thumbnails] img', 0)->getAttribute('src');
 		
-		return $retVal;
-        }
+		$mainTitle = $class->find('div[class=crs-li-name-and-tags] div[class=crs-li-name] div', 0)->text(); 
+		$subTitle = $class->find('div[class=crs-li-name-and-tags] div[class=crs-li-name] div', 1)->text();
+		$title = "{$mainTitle}: {$subTitle}";
+		
+		$category = $class->find('div[class=crs-li-name-and-tags] div[class=crs-li-tags] div', 0)->text();
+		
+		$shortDesc = $class->find('div[class=crs-li-text]', 0)->text();
+		
+		$classInfo->setCourseLink("{$this->baseURL}{$link}");
+		$classInfo->setTitle($title);
+		$classInfo->setSite($this->siteName);
+		$classInfo->setCategory($category);
+		$classInfo->setShortDescription(trim($shortDesc));
+		$classInfo->setCourseImage($thumbnail);
+	}
         
-    private function getDetailedDescription($classURL) {
-		$class = file_get_html($classURL);
-		$main = $class->find('section[id=main]');
-		$top = $class->find('section[id=main] div[class=gray-noise-box pad-box no-sides]', 0);
-		$bottom = $class->find('section[id=main] div[class=light-bg pad-box no-sides top-rule-box]', 0);
+    private function getDetailedDescription($classInfo) {
+		$class = file_get_html($classInfo->getCourseLink());
 		
-		// get image url
-		$imageURL = $class->find('div class="crs-li-thumbnails" img',0)->getAttribute('src');
-		
-		// get course title
-		$title = $top->find('div.course-detail-info h2', 0)->text();
-		
-		// start and end dates
-		$startDate = $this->getStartDate($top);
-		$endDate = $this->getEndDate($top);
+		$vidID = $class->find('div[class=scale-media]', 0)->first_child()->getAttribute('video-id');
+		$video = "http://www.youtube.com/watch?v={$vidID}";
 
-		// get price of this class
-		$price = $this->getClassPrice($top);
+		$desc = $class->find('div.sum-need-get', 0)->plaintext;
+		
+		$instName = $class->find('div.inst-bio h5', 0)->text();		
+		$instImg = $class->find('div.inst-bio img', 0)->getAttribute('src');
 
-		// get full class description
-		$description = $this->getFullDescription($bottom);
-		
-		// get prof name
-		$profName = $this->getProfName($bottom);
-		
-		// get prof image
-		$profImage = $this->getProfImage($bottom);
-		
-		$category = $this->getClassCategory($class);
-		
-		$isFull = $this->getClassStatus($top);
-		
-		$duration = $this->getClassDuration($startDate, $endDate);
-		$retVal = array(
-			"title" => $title,
-			"classImageURL" => $imageURL,
-			"startDate" => $startDate,
-			"endDate" => $endDate,
-			"price" => $price,
-			"longDesc" => $description,
-			"profName" => $profName,
-			"profImage" => $profImage,
-			"category" => $category,
-			"status" => $isFull,
-			"duration" => $duration,
-			"video_link" => ""
-		);
-		
-		return $retVal;
+
+
+		$classInfo->setVideoLink($video);
+		$classInfo->setCourseLength("");
+		$classInfo->setStartDate("");
+		$classInfo->setLongDescription(trim($desc));
+		$classInfo->setProfName(trim($instName));
+		$classInfo->setProfImage($instImg);
 	}
 	
 }

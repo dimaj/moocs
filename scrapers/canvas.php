@@ -22,6 +22,7 @@ class Canvas extends Scraper{
 		$this->url = $website;
 		$this->siteName = $name;
 		$this->mainPageSearchStr = $classSearchStr;
+		$this->baseURL = $this->getBaseURL($website);
 	}
 	
 	/**

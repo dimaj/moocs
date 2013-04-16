@@ -59,5 +59,13 @@ abstract class Scraper {
 		
 		return true;
 	}
+	
+	protected function getBaseURL($url) {
+		$components = parse_url($url);
+		
+		return "{$components['scheme']}://{$components['host']}";
+	}
+	
+
 }
 ?>
