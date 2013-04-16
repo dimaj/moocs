@@ -2,6 +2,7 @@
 
 require_once("lib/database.php");
 include('lib/simple_html_dom.php');
+require_once("ClassInfo.php");
 
 /**
 	This abstract class tells other scrapers how they should "behave"
@@ -14,7 +15,7 @@ abstract class Scraper {
 	/**
 		Method that has to be implemented that does all the scraping
 	*/
-	abstract protected function getClassInfo($class);
+	abstract protected function getClassInfo($class, $classInfoObj);
 
 	/**
 		Default constructor
@@ -37,13 +38,14 @@ abstract class Scraper {
 		
 		$count = 0;
 		foreach ($site->find($this->mainPageSearchStr) as $class) {
+			$classInfo = new ClassInfo();
 			// if we are over our limit, abort
 			if (($limit !== -1) && ($count >= $limit)) {
 				break;
 			}
 			
 			// get class information
-			$classInfo = $this->getClassInfo($class);
+			$this->getClassInfo($class, &$classInfo);
 			if (!$classInfo) {
 				continue;
 			}

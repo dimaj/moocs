@@ -71,19 +71,23 @@ class Database {
 	private function constructCourseDataQuery($class) {
 		$query = "INSERT INTO course_data VALUES ";
 		$query .= "(";
-		$query .= "DEFAULT,'" . mysql_real_escape_string($class["title"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["shortDsc"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["longDesc"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["link"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["video_link"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["startDate"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["duration"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["classImageURL"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["category"]) . "'";
-		$query .= ",'" . mysql_real_escape_string($class["site"]) . "'";
+		$query .= "DEFAULT,'" . $this->getMysqlString($class->getTitle()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getShortDescription()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getLongDescription()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getCourseLink()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getVideoLink()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getStartDate()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getCourseLength()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getCourseImage()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getCategory()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getSite()) . "'";
 		$query .= ")";
 		
 		return $query;
+	}
+	
+	private function getMysqlString($str) {
+		return mysql_real_escape_string($str);
 	}
 	
 	/**
@@ -92,10 +96,10 @@ class Database {
 	private function constructCorseDetailsQuery($class) {
 		$query = "INSERT INTO coursedetails VALUES ";
 		$query .= "(";
-		$query .= "DEFAULT,'" . mysql_real_escape_string($class['profName']) . "'";
-		$query .= ",'" . mysql_real_escape_string($class['profImage']) . "'";
+		$query .= "DEFAULT,'" . $this->getMysqlString($class->getProfName()) . "'";
+		$query .= ",'" . $this->getMysqlString($class->getProfImage()) . "'";
 		$query .= ")";
-		
+
 		return $query;
 	}
 	

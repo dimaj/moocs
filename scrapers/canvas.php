@@ -20,7 +20,7 @@ class Canvas extends Scraper{
 	function __construct($name, $website, $classSearchStr) {
 		parent::__construct();
 		$this->url = $website;
-		$this->scraperName = $name;
+		$this->siteName = $name;
 		$this->mainPageSearchStr = $classSearchStr;
 	}
 	
@@ -29,16 +29,12 @@ class Canvas extends Scraper{
 		param $class HTML block that contains class info from the main page
 		return Array with class information
 	*/
-	protected function getClassInfo($class) {
+	protected function getClassInfo($class, $classInfoObj) {
 		// get basic class information (from the main page)
-		$basic = $this->getBasicClassInfo($class);
+		$this->getBasicClassInfo($class, &$classInfoObj);
 		
 		// get detailed class information (by navigating to class' page and scraping it)
-		$detailed = $this->getDetailedDescription($basic['link']);
-		
-		// merge 2 arrays together
-		$classInfo = array_merge($basic, $detailed);
-		return $classInfo;
+		$this->getDetailedDescription(&$classInfoObj);
 	}
 	
 	/**
@@ -46,20 +42,15 @@ class Canvas extends Scraper{
 		param $class HTML block with current class from main page
 		return Array with scraped information
 	*/
-	private function getBasicClassInfo($class) {
+	private function getBasicClassInfo($class, $classInfo) {
 		// get the URL to the class details page
 		$link = $class->find('div.learn-more-container a', 0)->getAttribute('href');
 		// get short description
 		$shortDesc = $class->find('p[class=last fineprint pad-box-mini top-rule-box featured-course-desc]', 0)->text();
 		
-		// construct array with basic class info
-		$retVal = array(
-			"link" => trim($link),
-			"shortDesc" => trim($shortDesc),
-			"site" => "Canvas"
-		);
-		
-		return $retVal;
+		$classInfo->setCourseLink(trim($link));
+		$classInfo->setShortDescription(trim($shortDesc));
+		$classInfo->setSite($this->siteName);
 	}
 	
 	/**
@@ -67,8 +58,8 @@ class Canvas extends Scraper{
 		param $classURL URL of the class that is to be scraped
 		return Array with scraped information
 	*/
-	private function getDetailedDescription($classURL) {
-		$class = file_get_html($classURL);
+	private function getDetailedDescription($classInfo) {
+		$class = file_get_html($classInfo->getCourseLink());
 		
 		// page is broken up into 2 sections: top and bottom. Below are the HTML Nodes for Top section and bottom section
 		$top = $class->find('section[id=main] div[class=gray-noise-box pad-box no-sides]', 0);
@@ -105,21 +96,15 @@ class Canvas extends Scraper{
 		// get class duration in weeks
 		$duration = $this->getClassDuration($startDate, $endDate);
 		
-		// construct array of scraped data
-		$retVal = array(
-			"title" => $title,
-			"classImageURL" => $imageURL,
-			"startDate" => $startDate,
-			"endDate" => $endDate,
-			"price" => $price,
-			"longDesc" => $description,
-			"profName" => $profName,
-			"profImage" => $profImage,
-			"category" => $category,
-			"status" => $isFull,
-			"duration" => $duration,
-			"video_link" => ""
-		);
+		$classInfo->setTitle(trim($title));
+		$classInfo->setLongDescription(trim($description));
+		$classInfo->setVideoLink("");
+		$classInfo->setStartDate($startDate);
+		$classInfo->setCourseLength($duration);
+		$classInfo->setCategory("Science");
+		$classInfo->setCourseImage($imageURL);
+		$classInfo->setProfName($profName);
+		$classInfo->setProfImage($profImage);
 		
 		return $retVal;
 	}

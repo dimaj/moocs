@@ -18,7 +18,7 @@ class Udacity extends Scraper {
 		$this->mainPageSearchStr = $classSearchStr;
 	}
 	
-	function getClassInfo($class) {
+	function getClassInfo($class, $classInfoObj) {
 		return $this->createSampleData();
 	}
 	
