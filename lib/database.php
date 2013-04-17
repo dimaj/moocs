@@ -78,7 +78,8 @@ class Database {
 	private function constructCourseDataQuery($class) {
 		$query = "INSERT INTO course_data VALUES ";
 		$query .= "(";
-		$query .= "DEFAULT,'" . $this->getMysqlString($class->getTitle()) . "'";
+		$query .= "(select count(*) from coursedetails)+1"; // we need to add 1 as this is the first query to be executed
+		$query .= ",'" . $this->getMysqlString($class->getTitle()) . "'";
 		$query .= ",'" . $this->getMysqlString($class->getShortDescription()) . "'";
 		$query .= ",'" . $this->getMysqlString($class->getLongDescription()) . "'";
 		$query .= ",'" . $this->getMysqlString($class->getCourseLink()) . "'";
@@ -103,7 +104,8 @@ class Database {
 	private function constructCorseDetailsQuery($class) {
 		$query = "INSERT INTO coursedetails VALUES ";
 		$query .= "(";
-		$query .= "DEFAULT,'" . $this->getMysqlString($class->getProfName()) . "'";
+		$query .= "(select count(*) from course_data)"; // we don't need +1 as previous query is executed first
+		$query .= ",'" . $this->getMysqlString($class->getProfName()) . "'";
 		$query .= ",'" . $this->getMysqlString($class->getProfImage()) . "'";
 		$query .= ")";
 
