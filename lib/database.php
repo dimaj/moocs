@@ -17,7 +17,6 @@ class Database {
 	function __construct() {
 		$this->checkConfig();
 		$this->connectDB();
-		$this->clearTables();
 	}
 
 	/**
