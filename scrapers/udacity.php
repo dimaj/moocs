@@ -11,8 +11,8 @@
  * 
  */
 class Udacity extends Scraper {
-	function __construct($name, $website, $classSearchStr) {
-		parent::__construct();
+	function __construct($name, $website, $classSearchStr, $database) {
+		parent::__construct($database);
 		$this->url = $website;
 		$this->siteName = $name;
 		$this->mainPageSearchStr = $classSearchStr;

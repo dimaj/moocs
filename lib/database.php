@@ -22,7 +22,7 @@ class Database {
 	/**
 		Clears tables from selected database
 	*/	
-	private function clearTables() {
+	function clearTables() {
 		// clear table data
 		mysql_query("TRUNCATE TABLE course_data");
 		mysql_query("TRUNCATE TABLE coursedetails");

@@ -1,6 +1,5 @@
 <?php
 
-require_once("lib/database.php");
 include('lib/simple_html_dom.php');
 require_once("ClassInfo.php");
 
@@ -20,8 +19,8 @@ abstract class Scraper {
 	/**
 		Default constructor
 	*/
-	function __construct() {
-		$this->db = new Database();
+	function __construct($database) {
+		$this->db = $database;
 	}
 	
 	/**
@@ -30,6 +29,10 @@ abstract class Scraper {
 		returns Array of scraped data
 	*/
 	public function scrape($limit = -1) {
+	
+		// clear DB
+		$this->db->clearTables();
+		
 		$site = file_get_html($this->url);
 		
 		if (!$limit) {
