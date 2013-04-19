@@ -31,7 +31,7 @@ abstract class Scraper {
 	public function scrape($limit = -1) {
 	
 		// clear DB
-		$this->db->clearTables();
+//		$this->db->clearTables();
 		
 		$site = file_get_html($this->url);
 		
