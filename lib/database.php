@@ -138,6 +138,7 @@ class Database {
 	public function getData() {
 		$query = "
 			SELECT * FROM course_data
+			LEFT JOIN coursedetails USING (id)
 		";
 
 		try {			
