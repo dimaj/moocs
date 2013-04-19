@@ -1,14 +1,18 @@
 <?php
 require_once("config/config.php");
+require_once("lib/database.php");
 
-$DB_VERSION = '0.0.1';
+$API_VERSION = '0.0.1';
+
+$database = new Database();
 
 $status = 0;
 $messages = array();
-$data = array('key' => 'value');
+$data = $database->getData();
+#$data = array('key' => 'value');
 
 $object = array(
-	'database_version' => $DB_VERSION
+	'api_version' => $API_VERSION
 	, 'status' => $status
 	, 'messages' =>  $messages
 	, 'data' => $data
