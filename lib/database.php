@@ -7,8 +7,6 @@
    Description: Updates database with latest class information
 */
 
-// require_once("config/config.php");
-
 class Database {
 	/**
 		Creates an instance of the database class using configuration values from
@@ -17,8 +15,47 @@ class Database {
 	function __construct() {
 		$this->checkConfig();
 		$this->connectDB();
+		if ($this->checkDB()) {
+			// add tables to db
+			$this->setupDB();
+		}
 	}
 
+	/**
+		This function reads sql file with table definitions and executes read-in queries
+	*/
+	private function setupDB() {
+		$err;
+		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['configFile'])));
+		foreach ($sql as $query) {
+			$query = trim($query);
+			if (strlen($query) == 0) {
+				continue;
+			}
+			
+			mysql_query($query)
+				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
+		}
+	}
+	
+	/**
+		Checks to see if all required tables are present
+	*/
+	private function checkDB() {
+		$course_data = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'moocs1') AND (TABLE_NAME = 'course_data')";
+		$coursedetails = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'moocs1') AND (TABLE_NAME = 'coursedetails')";
+		
+		$c_dRes = mysql_query($course_data)
+			or die("Error while checking existence of 'course_data' table..." . mysql_error() . "\n");
+		$cdRes = mysql_query($coursedetails)
+			or die("Error while checking existence of 'coursedetails' table..." . mysql_error() . "\n");
+
+		$c_dCount = mysql_result($c_dRes, 0);
+		$cdCount = mysql_result($cdRes, 0);
+		
+		return ($c_dCount == 0 || $cdCount == 0);
+	}
+	
 	/**
 		Clears tables from selected database
 	*/	
@@ -42,8 +79,18 @@ class Database {
 		// connect to database
 		$this->conn = @mysql_connect($host, $GLOBALS['db']['user'], $GLOBALS['db']['pass'])
 			or die ("Could not connect to host '" . $GLOBALS['db']['host'] . "'.\n");
-		mysql_select_db($GLOBALS['db']['db'])
-			or die ("Could not select database '" . $GLOBALS['db']['db'] . ".\n");
+		$isSelected = mysql_select_db($GLOBALS['db']['db']);
+		if (!$isSelected) {
+			// create database
+			$query = "CREATE DATABASE IF NOT EXISTS " . $GLOBALS['db']['db'];
+			$err;
+			$this->executeQuery($query, &$err)
+				or die ("Could not create database... " . $err . "\n");
+		
+			// select database
+			mysql_select_db($GLOBALS['db']['db'])
+				or die ("Could not select database..." . mysql_error());
+		}
 	}
 	
 	/**
@@ -61,6 +108,9 @@ class Database {
 		}
 		if ($this->isNullOrEmpty($GLOBALS['db']['db'])) {
 			die ("Database name is required for database connetion.\nPlease configure it in config/config.php file.\n");
+		}
+		if ($this->isNullOrEmpty($GLOBALS['db']['configFile'])) {
+			die ("Database configuration sql file is required for database initialization.\nPlease configure it in config/config.php file.\n");
 		}
 	}
 
@@ -117,15 +167,26 @@ class Database {
 	public function updateClass($class) {
 		$query1 = $this->constructCourseDataQuery($class);
 		$query2 = $this->constructCorseDetailsQuery($class);
-		try {			
-			mysql_query($query1);
-			mysql_query($query2);
+		$err;
+		if (!$this->executeQuery($query1, &$err)) {
+			echo $err;
+		}
+		if (!$this->executeQuery($query2, &$err)) {
+			echo $err;
+		}
+	}
+	
+	private function executeQuery($query, $error) {
+		try {
+			return mysql_query($query);
 		}
 		catch (MySQLException $err) {
+		    $error = $err;
 		    $err->getMessage();
 			echo $err;
 		}
 		catch (MySQLDuplicateKeyException $err) {
+		    $error = $err;
 			// duplicate entry exception
 			$err->getMessage();
 			echo $err;
