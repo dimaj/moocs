@@ -1,0 +1,16 @@
+READ THIS FIRST
+The attached files are working sample code for you to modify for your own web content scraping need.
+Step 0: Unzip this file and put these files under your webfolder/moocs
+Step 1: Start your local web server and database server
+Step 2: Open a browser and go to http://localhost/phpmyadmin/
+Step 3: Create a database called moocs
+Step 4: Select the newly created database and select "import" tab on the upper middle area of your phpmyadmin screen
+Step 5: Locate moocs.sql from the folder in Step 0 and select OK to start importing the database
+Step 6: Go to http://localhost/moocs/canvas.php and submit
+Step 7: You will see canvas.net courses being scraped and inserted into your database tables.
+Step 8: Study your own assigned website and modify canvas.net for similar web scraping and data saving purposes.
+
+
+Note 1: you must use the moocs.sql to create tables and save scraped data to so we can share aggregated data across 6 sites later on.
+
+Note 2: Some data in your websites may need to formatted or transformed before saving to the database.
