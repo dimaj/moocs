@@ -29,35 +29,37 @@ abstract class Scraper {
 		returns Array of scraped data
 	*/
 	public function scrape($limit = -1) {
-	
-		// clear DB
-//		$this->db->clearTables();
+		try {
+			$site = file_get_html($this->url);
 		
-		$site = file_get_html($this->url);
-		
-		if (!$limit) {
-			$limit = -1;
-		}
-		
-		$count = 0;
-		foreach ($site->find($this->mainPageSearchStr) as $class) {
-			$classInfo = new ClassInfo();
-			// if we are over our limit, abort
-			if (($limit !== -1) && ($count >= $limit)) {
-				break;
+			if (!$limit) {
+				$limit = -1;
 			}
+		
+			$count = 0;
+			foreach ($site->find($this->mainPageSearchStr) as $class) {
+				$classInfo = new ClassInfo();
+				// if we are over our limit, abort
+				if (($limit !== -1) && ($count >= $limit)) {
+					break;
+				}
 			
-			// get class information
-			$this->getClassInfo($class, &$classInfo);
-			if (!$classInfo) {
-				continue;
+				// get class information
+				$this->getClassInfo($class, &$classInfo);
+				if (!$classInfo) {
+					continue;
+				}
+
+				// update database with current class's results
+				$this->db->updateClass($classInfo);
+
+				// increment counter
+				$count++;
 			}
-
-			// update database with current class's results
-			$this->db->updateClass($classInfo);
-
-			// increment counter
-			$count++;
+		}
+		catch (Exception $e) {
+			print "There was an exception while trying to scrape data from " . $this->siteName . "\n";
+			print "Exception details: " . $e->getMessage() . "\n";
 		}
 		
 		return true;
