@@ -42,8 +42,8 @@ class Database {
 		Checks to see if all required tables are present
 	*/
 	private function checkDB() {
-		$course_data = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'moocs1') AND (TABLE_NAME = 'course_data')";
-		$coursedetails = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'moocs1') AND (TABLE_NAME = 'coursedetails')";
+		$course_data = "select count(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'course_data'";
+		$coursedetails = "select count(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'coursedetails'";
 		
 		$c_dRes = mysql_query($course_data)
 			or die("Error while checking existence of 'course_data' table..." . mysql_error() . "\n");
