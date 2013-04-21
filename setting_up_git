@@ -1,0 +1,5 @@
+Setup for first time GitHub/Mercurial (windows users)
+1. download github  => http://git-scm.com/downloads
+2. after installation, run GIT Bash
+3. https://help.github.com/articles/generating-ssh-keys
+4. https://github.com/sevntu-checkstyle/sevntu.checkstyle/wiki/Development-workflow-with-Git%3A-Fork%2C-Branching%2C-Commits%2C-and-Pull-Request
