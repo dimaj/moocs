@@ -35,7 +35,8 @@ $(function() {
             , {sTitle: 'Instructor', mData: 'profname'}
         	, {sTitle: 'Instructor Image', mData: function (source) {
         		return '<img src="' + source.profimage + '" class="img-rounded" height="100" width="100">';
-        	}}
+            }}
+            , {sTitle: 'Site', mData: 'site'}
         ]
 	});
 });
