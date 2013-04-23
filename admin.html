@@ -10,16 +10,26 @@
 	    $.ajax({
                type: 'POST',
                url: 'ClassScraper.php',
-			   async : true,
+			   async : false,
                dataType: 'json', 
                success: function(response)
                {
-                alert("success");
+                alert("scrape successful");
                },
-			   error : function(error) {
-				alert("error");
-			   },
-			   
+			   error: function(xhr) {
+				if (xhr.status = "200") {
+				 alert("scrape successful");
+				}
+				else if (xhr.status = "404") {
+				 alert("can not find page");
+				}
+				else if (xhr.status = "500") {
+				 alert("internal service error");
+				}
+				else {
+				alert("error, error code " + xhr.status);
+				}
+			}	   
          });
 	}
 	function back() {
