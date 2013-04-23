@@ -9,8 +9,8 @@
 	function scrape() {
 	    $.ajax({
                type: 'POST',
-               url: 'GetData.php',
-			   async : false,
+               url: 'ClassScraper.php',
+			   async : true,
                dataType: 'json', 
                success: function(response)
                {
