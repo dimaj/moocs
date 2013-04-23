@@ -244,10 +244,7 @@ class Canvas extends Scraper{
 		// make sure that date is in correct format
 		preg_match( '/(\w+)\s*([0-9]{1,2}),\s*([0-9]{4})/', $dateStr, $match);
 		if (count($match) === 4) {
-			$dateStr = $match[1] . " ";
-			$dateStr .= (strlen($match[2]) === 1) ? ("0".$match[2]) : $match[2];
-			$dateStr .= ", " . $match[3];
-			$retVal = DateTime::createFromFormat("M d, Y+", $dateStr)->format("Y-m-d");
+			$retval = sprintf("%4d-%02d-%02d", $match[3], $match[2], $match[1]);
 			return $retVal;
 		}
 		return null;
