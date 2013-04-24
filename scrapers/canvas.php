@@ -282,7 +282,7 @@ class Canvas extends Scraper{
 		
 		$start = new DateTime($start);
 		$end = new DateTime($end);
-		$diff = round(abs($end->format('U') - $start->format('U')) / (60*60*24));
+		$diff = round(abs($end->format('U') - $start->format('U')) / (60*60*24*7));
 		return $diff;
 	}
 }
