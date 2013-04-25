@@ -107,7 +107,7 @@ class Canvas extends Scraper{
 		$classInfo->setProfName($profName);
 		$classInfo->setProfImage($profImage);
 		
-		return $retVal;
+		#return $retVal;
 	}
 	
 	/**
@@ -241,13 +241,13 @@ class Canvas extends Scraper{
 		return Date in correct format
 	*/
 	private function formatDate($dateStr) {
+		$month = array('Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4
+				, 'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8
+				, 'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12);
 		// make sure that date is in correct format
 		preg_match( '/(\w+)\s*([0-9]{1,2}),\s*([0-9]{4})/', $dateStr, $match);
 		if (count($match) === 4) {
-			$dateStr = $match[1] . " ";
-			$dateStr .= (strlen($match[2]) === 1) ? ("0".$match[2]) : $match[2];
-			$dateStr .= ", " . $match[3];
-			$retVal = DateTime::createFromFormat("M d, Y+", $dateStr)->format("Y-m-d");
+			$retVal = sprintf("%4d-%02d-%02d", intval($match[3]), $month[$match[1]], intval($match[2]));
 			return $retVal;
 		}
 		return null;
@@ -280,10 +280,9 @@ class Canvas extends Scraper{
 			return null;
 		}
 		
-		$start = DateTime::createFromFormat("Y-m-d", $start);
-		$end = DateTime::createFromFormat("Y-m-d", $end);
-		$diff = $start->diff($end);
-		$diff = round($diff->format("%R%a") / 7);
+		$start = new DateTime($start);
+		$end = new DateTime($end);
+		$diff = round(abs($end->format('U') - $start->format('U')) / (60*60*24*7));
 		return $diff;
 	}
 }
