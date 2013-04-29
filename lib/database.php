@@ -219,5 +219,29 @@ class Database {
 		return $data;
 	}
 
+	/**
+		Get Type Ahead Data 
+	*/
+	public function getTypeAheadData() {
+		$query = "
+			SELECT title FROM course_data
+		";
+
+		try {			
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row);
+		}
+
+		return $data;
+	}
 }
 ?>
