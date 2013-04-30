@@ -1,11 +1,16 @@
 $(function() {
-	var API = 'GetData.php';	
+	$('#input_search').typeahead({
+		source: function (query, process) {
+            process(['adland', 'Huy', 'Jamie', 'Duc', 'Dimitry', 'David', 'Chinu', 'Surafel']);
+        }
+	});
+
 	var course_list = [];
 	var target = $('#table');
 
     $.ajax({
         type: 'POST',
-        url: API,
+        url: 'GetData.php',
         async: false,
         dataType: 'json',
         success: function(response) {
