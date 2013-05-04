@@ -9,7 +9,6 @@ $database = new Database();
 $status = 0;
 $messages = array();
 $data = $database->getTypeAheadData();
-#$data = array('key' => 'value');
 
 $object = array(
 	'api_version' => $API_VERSION
