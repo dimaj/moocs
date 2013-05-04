@@ -248,7 +248,7 @@ class Database {
 		$days = $GLOBALS['newClassDuration'];
 		$start = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday'] - $days);
 
-		$sql="select title from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}";
+		$sql="select * from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}";
 
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
