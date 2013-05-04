@@ -26,7 +26,20 @@ class Database {
 	*/
 	private function setupDB() {
 		$err;
+		// setup main DB
 		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['configFile'])));
+		foreach ($sql as $query) {
+			$query = trim($query);
+			if (strlen($query) == 0) {
+				continue;
+			}
+			
+			mysql_query($query)
+				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
+		}
+
+		// setup CourseTracker DB
+		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['courseTracker'])));
 		foreach ($sql as $query) {
 			$query = trim($query);
 			if (strlen($query) == 0) {
@@ -44,16 +57,27 @@ class Database {
 	private function checkDB() {
 		$course_data = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = '". $GLOBALS['db']['db'] . "') AND (TABLE_NAME = 'course_data')";
 		$coursedetails = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = '". $GLOBALS['db']['db'] . "') AND (TABLE_NAME = 'coursedetails')";
+		$coursemeta = "select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = '". $GLOBALS['db']['db'] . "') AND (TABLE_NAME = 'course_meta')";
 		
 		$c_dRes = mysql_query($course_data)
 			or die("Error while checking existence of 'course_data' table..." . mysql_error() . "\n");
 		$cdRes = mysql_query($coursedetails)
 			or die("Error while checking existence of 'coursedetails' table..." . mysql_error() . "\n");
+		$cmRes = mysql_query($coursemeta)
+			or die("Error while checking existence of 'course_meta' table..." . mysql_error() . "\n");
 
 		$c_dCount = mysql_result($c_dRes, 0);
 		$cdCount = mysql_result($cdRes, 0);
+		$cmCount = mysql_result($cmRes, 0);
 		
-		return ($c_dCount == 0 || $cdCount == 0);
+		return ($c_dCount == 0 || $cdCount == 0 || $cmCount == 0);
+	}
+	
+	/**
+		Creates a table for tracking newly added courses
+	*/
+	function createCourseTrackingTable() {
+		$sql = "";
 	}
 	
 	/**
@@ -202,14 +226,14 @@ class Database {
 			LEFT JOIN coursedetails USING (id)
 		";
 
-		try {			
+		try {
 			$result = mysql_query($query);
 		}
 		catch (MySQLException $err) {
 		    $err->getMessage();
 			echo $err;
 		}
-
+		
 		$data = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
@@ -219,5 +243,52 @@ class Database {
 		return $data;
 	}
 
+	public function getClassID($course) {
+		$sql = "select id from course_data where title='" . $course->getTitle() . "'";
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
+		
+		$values = mysql_fetch_assoc($results);
+		$id = $values['id'];
+		
+		return ($id == null) ? null : $id;
+		
+	}
+	
+	public function getClassesIDs() {
+		$sql = "select id from course_data";
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
+		$ids = array();
+		while ($row = mysql_fetch_assoc($results)) {
+			array_push($ids, $row['id']);
+		}
+		
+		return $ids;
+	}
+	
+	public function clearOldClasses($ids) {
+		foreach ($ids as $id) {
+			$err = null;
+			$sql1 = "delete from course_data where id='" . $id . "'";
+			$sql2 = "delete from coursedetails where id='" . $id . "'";
+			$sql3 = "delete from course_meta where cid='" . $id . "'";
+			$this->executeQuery($sql1, &$err);
+			$this->executeQuery($sql2, &$err);
+		}
+	}
+	
+	public function updateMetadata($class) {
+		print "I am here\n";
+		$todayArr = getDate();
+		$date = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday']);
+		$err = null;
+		$classId = $this->getClassID($class);
+		$insertSql = "insert into course_meta (`cid`, `date`) values ('" . $classId . "', '" . $date . "')";
+		
+		print "Date is: {$date}\nclass id is: {$classId}\nsql is: ${insertSql}\n";
+		
+		$this->executeQuery($insertSql, &$err);
+	}
 }
 ?>

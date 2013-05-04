@@ -13,6 +13,7 @@ $GLOBALS['db'] = array(
 	, "pass" => "password for that user"
 	, "db" => "name of the database, where data is stored"
 	, "configFile" => "path to .sql file that defines table structure"
+	, "courseTracker" => "path to .sql file that defines table for tracking when a course has been added"
 );
 
 $GLOBALS['scrapers'] = array();

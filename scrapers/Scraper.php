@@ -21,6 +21,7 @@ abstract class Scraper {
 	*/
 	function __construct($database) {
 		$this->db = $database;
+		$this->ids = $database->getClassesIDs();
 	}
 	
 	/**
@@ -49,10 +50,18 @@ abstract class Scraper {
 				if (!$classInfo) {
 					continue;
 				}
-
-				// update database with current class's results
-				$this->db->updateClass($classInfo);
-
+				
+				$id = $this->db->getClassID($classInfo);
+				if (!$id) {
+					// update database with current class's results
+					$this->db->updateClass($classInfo);
+					$this->db->updateMetadata($classInfo);
+				}
+				else {
+					// remove element from the ids array
+					$this->ids = array_diff($this->ids, array($id));
+				}
+				
 				// increment counter
 				$count++;
 			}
@@ -62,7 +71,7 @@ abstract class Scraper {
 			print "Exception details: " . $e->getMessage() . "\n";
 		}
 		
-		return true;
+		return $this->ids;
 	}
 	
 	protected function getBaseURL($url) {
