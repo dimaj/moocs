@@ -243,6 +243,24 @@ class Database {
 		return $data;
 	}
 
+	public function getNewClasses() {
+		$todayArr = getDate();
+		$days = $GLOBALS['newClassDuration'];
+		$start = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday'] - $days);
+
+		$sql="select title from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}";
+
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
+		$data = array();
+		while ($row = mysql_fetch_assoc($results)) {
+			array_push($data, $row);
+		}
+		
+		return $data;
+		
+	}
+
 	public function getClassID($course) {
 		$sql = "select id from course_data where title='" . $course->getTitle() . "'";
 		$err = null;
@@ -279,7 +297,6 @@ class Database {
 	}
 	
 	public function updateMetadata($class) {
-		print "I am here\n";
 		$todayArr = getDate();
 		$date = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday']);
 		$err = null;

@@ -16,6 +16,8 @@ $GLOBALS['db'] = array(
 	, "courseTracker" => "path to .sql file that defines table for tracking when a course has been added"
 );
 
+$GLOBALS['newClassDuration'] = 14; // 2 weeks
+
 $GLOBALS['scrapers'] = array();
 
 $GLOBALS['scrapers']['canvas'] = array(
