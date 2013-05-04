@@ -1,7 +1,7 @@
 $(function() {
 	$('#input_search').typeahead({
 		source: function (query, process) {
-            process(['adland', 'Huy', 'Jamie', 'Duc', 'Dimitry', 'David', 'Chinu', 'Surafel']);
+            get_course_search_data(process);
         }
 	});
 
@@ -55,4 +55,42 @@ $(function() {
 	$("div#course_trend_ticker ul").liScroll();
 	$("div#new_course_ticker").append(new_course_scroll);
 	$("div#new_course_ticker ul").liScroll();
+
+
+    var get_course_search_data = function (process) {
+        $.ajax({
+            type: 'POST',
+            url: 'get-type-ahead-data.php',
+            async: false,
+            dataType: 'json',
+            success: function(response) {
+                console.log(response);
+                course_list = response.data;
+                process(course_list)
+            }
+        });
+        
+        return;    
+    };
+
+    var search_for_courses = function (param) {
+
+    };
+
+    var populate_new_course_ticker = function (param) {
+
+    };
+
+    var get_new_course_data = function () {
+
+    };
+
+    var populate_feature_course_ticker = function (param) {
+
+    };
+
+    var get_featured_course_data = function () {
+        
+    };
+
 });

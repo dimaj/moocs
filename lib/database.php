@@ -238,7 +238,7 @@ class Database {
 		$data = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
-			array_push($data, $row);
+			array_push($data, $row['title']);
 		}
 
 		return $data;
