@@ -133,8 +133,9 @@ $(function() {
 
                 for (var i in course_list) {
                     course = course_list[i];
-                    record = $('<li />');
-                    record.html(course.title);
+                    record = 
+                        $('<li />')
+                            .html(course.title);
                     new_course_scroll.append(record);
                 }
 
