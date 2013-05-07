@@ -331,5 +331,9 @@ class Database {
 
 		return $data;
 	}
+
+	public function searchForCourses ($param) {
+		return $param;
+	}
 }
 ?>
