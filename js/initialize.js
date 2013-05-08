@@ -75,6 +75,29 @@ $(function() {
         show_search_results_view();
     };
 
+    var show_job_results = function (param) {
+        console.log(param);
+
+        var job_list = param.job_list;
+        var target = $('#job_results_table');
+
+        target.dataTable({
+            bDestroy: true
+            , bJQueryUI: false
+            , bFilter: false
+            , bInfo: false
+            , bPaginate: false
+            , aaData: job_list
+            , aoColumns: [
+                {sTitle: 'Jobs', mData: function (source) {
+                    var title = source.title;
+                    var link = source.link;
+                    return '<a href=' + link + '>' + title + '</a>'
+                }}
+            ]
+        });
+    };
+
     var show_all_courses = function () {
         $.ajax({
             type: 'GET',
@@ -265,6 +288,18 @@ $(function() {
                     }
             });
 
+            $.ajax({
+                'type': 'GET'
+                , 'url': 'scrapers/MonsterScraper.php'
+                , 'data': data
+                , 'dataType': 'json'
+                , 'success': function(response) {
+                        show_job_results({
+                            'job_list': response.data
+                        });
+                        console.log(response);
+                    }
+            });
             return;
         });
 
