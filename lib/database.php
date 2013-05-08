@@ -369,6 +369,7 @@ class Database {
 					AGAINST ('%s')
 			"
 			, $input_search
+			, $input_search
 			);
 
 		try {
