@@ -1,4 +1,24 @@
 $(function() {
+    $.fn.serializeObject = function() {
+        var o = Object.create(null),
+            elementMapper = function(element) {
+                element.name = $.camelCase(element.name);
+                return element;
+            },
+            appendToResult = function(i, element) {
+                var node = o[element.name];
+
+                if ('undefined' != typeof node && node !== null) {
+                    o[element.name] = node.push ? node.push(element.value) : [node, element.value];
+                } else {
+                    o[element.name] = element.value;
+                }
+            };
+
+        $.each($.map(this.serializeArray(), elementMapper), appendToResult);
+        return o;
+    };
+
     var show_search_results_view = function () {        
         $('#search_results_view')
             .siblings()
@@ -161,8 +181,14 @@ $(function() {
 
     $('#search_form')
         .off('submit')
-        .submit(function () {
-            var data = $('#search_form').serialize();
+        .submit(function (e) {
+            e.preventDefault();
+
+            var data = $('#search_form').serializeObject();
+
+            if (/^\s*$/.test(data['input_search'])) {
+                return;
+            }
 
             $.ajax({
                 'type': 'GET'
@@ -177,7 +203,7 @@ $(function() {
                     }
             });
 
-            return false;
+            return;
         });
 
     $('#advanced_search_button')
