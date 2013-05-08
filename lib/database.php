@@ -330,5 +330,46 @@ class Database {
 
 		return $data;
 	}
+
+	public function searchForClasses ($param) {
+		return $param;
+	}
+
+	public function getFeaturedClasses () {
+		$data = array();
+
+		return $data;
+	}
+
+	public function getClass ($param) {
+		if (! array_key_exists('class_id', $param)) {
+			return NULL;
+		}
+
+		$unsafe_class_id = $param['class_id'];
+		$class_id = mysql_real_escape_string($unsafe_class_id);
+
+		$query = "
+			SELECT * FROM course_data
+			LEFT JOIN coursedetails USING (id)
+			WHERE id = $class_id
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row);
+		}
+
+		return $data;
+	}
 }
 ?>
