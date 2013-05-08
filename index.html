@@ -31,8 +31,8 @@
     		<div class="hero-unit">
     			<h1>Learning Nexus</h1>
     			<p>
-    				<form id="search_form" class="form-search">
-    					<input id="input_search" type="search_field" class="input-medium search-query" />
+    				<form id="search_form" class="form-horizontal">
+    					<input name="input_search" type="search_field" class="input-medium search-query" />
                         <div class="btn-group">
         					<button id="search_button" class="btn" type="submit" class="btn">Search</button>
         					<div id="advanced_search_button" class="btn">
@@ -40,7 +40,8 @@
                             </div>
                         </div>
                         <div id="advanced_search_parameters" class="collapse">
-                            test<br>
+                            <div id="input-category">Category</div>
+                            <div id="input-site">Site</div>
                             test
                         </div>
     				</form>
@@ -62,6 +63,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/jquery.dataTables.min.js"></script>
 <script src="assets/js/jquery.li-scroller.1.0.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.0.2/js/bootstrap-datepicker.min.js"></script>
 <script src="js/initialize.js"></script>
 </html>
 

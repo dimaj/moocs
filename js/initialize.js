@@ -162,7 +162,9 @@ $(function() {
     $('#search_form')
         .off('submit')
         .submit(function () {
+            console.log($('#search_form'));
             var data = $('#search_form').serialize();
+            console.log(data);
 
             $.ajax({
                 'type': 'GET'
