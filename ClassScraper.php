@@ -34,11 +34,13 @@ foreach ($GLOBALS['scrapers'] as $scraper) {
 }
 
 // Clear database tables
-$db->clearTables();
+// $db->clearTables();
 
 // iterate over the scrapers and scrape data
 foreach ($addedScrapers as $scraper) {
-	$scraper->scrape();
+	$deleted = $scraper->scrape();
+	// empty out classes that have been deleted
+	$db->clearOldClasses($deleted);
 }
 	
 ?>
