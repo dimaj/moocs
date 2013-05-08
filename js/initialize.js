@@ -74,7 +74,7 @@ $(function() {
             , url: 'get-type-ahead-data.php'
             , dataType: 'json'
             , success: function(response) {
-                console.log(response);
+//                console.log(response);
                 course_list = response.data;
                 process(course_list)
             }

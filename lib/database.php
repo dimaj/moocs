@@ -51,6 +51,30 @@ class Database {
 			mysql_query($query)
 				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
 		}
+
+		$query = "ALTER TABLE `course_data` ENGINE = MYISAM";
+		mysql_query($query)
+			or die("Error updating table course_data engine");
+
+		$query = "ALTER TABLE `coursedetails` ENGINE = MYISAM";
+		mysql_query($query)
+			or die("Error updating table coursedetails engine");
+
+		$query =
+			"ALTER TABLE  `course_data` ADD FULLTEXT (
+				`title`
+				, `short_desc`
+				, `long_desc`
+			)";
+		mysql_query($query)
+			or die("Error adding course_data fulltext index");
+
+		$query =
+			"ALTER TABLE  `coursedetails` ADD FULLTEXT (
+				`profname`
+			)";
+		mysql_query($query)
+			or die("Error adding coursedetails index");
 	}
 	
 	/**
@@ -332,7 +356,33 @@ class Database {
 	}
 
 	public function searchForClasses ($param) {
-		return $param;
+		$unsafe_input_search = $param['input_search'];
+		$input_search = mysql_real_escape_string($unsafe_input_search);
+
+		$query = sprintf(
+			"SELECT * FROM course_data
+			LEFT JOIN coursedetails USING (id)
+			WHERE MATCH (title, short_desc, long_desc)
+			AGAINST ('%s')
+			"
+			, $input_search
+			);
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row);
+		}
+
+		return $data;
 	}
 
 	public function getFeaturedClasses () {
