@@ -356,35 +356,41 @@ class Database {
 	}
 
 	public function searchForClasses ($param) {
-		$unsafe_input_search = $param['input_search'];
-		$input_search = mysql_real_escape_string($unsafe_input_search);
-
 		$search_filter_array = array();
 
+		if ($param['input_search']) {
+			$input_search = mysql_real_escape_string($param['input_search']);
+			array_push($search_filter_array
+				, sprintf(
+					"(MATCH (title, short_desc, long_desc)
+						AGAINST ('%s')
+					OR MATCH (coursedetails.profname)
+						AGAINST ('%s'))"
+					, $input_search
+					, $input_search
+					)
+				);
+		}
+
 		if ($param['category']) {
-			array_push($search_filter_array, "(category = '{$param['category']}')");
+			$category = mysql_real_escape_string($param['category']);
+			array_push($search_filter_array, "(category = '{$category}')");
 		}
 
 		if ($param['site']) {
-			array_push($search_filter_array, "(site = '{$param['site']}')");
+			$site = mysql_real_escape_string($param['site']);
+			array_push($search_filter_array, "(site = '{$site}')");
 		}
 
 		if (count($search_filter_array)) {
-			$search_filter = "AND" . join("AND", $search_filter_array);
+			$search_filter = "WHERE" . join("AND", $search_filter_array);
 		}
 
 		$query = sprintf(
 			"SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
-			WHERE
-				(MATCH (title, short_desc, long_desc)
-					AGAINST ('%s')
-				OR MATCH (coursedetails.profname)
-					AGAINST ('%s'))
-				%s
+			%s
 			"
-			, $input_search
-			, $input_search
 			, $search_filter
 			);
 

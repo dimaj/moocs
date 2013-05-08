@@ -242,8 +242,11 @@ $(function() {
             e.preventDefault();
 
             var data = $('#search_form').serializeObject();
+            console.log(data);
 
-            if (/^\s*$/.test(data['input_search'])) {
+            if (/^\s*$/.test(data['input_search'])
+                && /^\s*$/.test(data['category'])
+                && /^\s*$/.test(data['site'])) {
                 return;
             }
 
