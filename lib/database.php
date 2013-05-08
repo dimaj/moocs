@@ -13,6 +13,8 @@ class Database {
 		config.php file
 	*/
 	function __construct() {
+		$this->moocs = "config/moocs.sql";
+		$this->tracker = "config/course_meta.sql";
 		$this->checkConfig();
 		$this->connectDB();
 		if ($this->checkDB()) {
@@ -27,7 +29,7 @@ class Database {
 	private function setupDB() {
 		$err;
 		// setup main DB
-		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['configFile'])));
+		$sql = explode(";",file_get_contents(realpath($this->moocs)));
 		foreach ($sql as $query) {
 			$query = trim($query);
 			if (strlen($query) == 0) {
@@ -39,7 +41,7 @@ class Database {
 		}
 
 		// setup CourseTracker DB
-		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['courseTracker'])));
+		$sql = explode(";",file_get_contents(realpath($this->tracker)));
 		foreach ($sql as $query) {
 			$query = trim($query);
 			if (strlen($query) == 0) {
@@ -132,9 +134,6 @@ class Database {
 		}
 		if ($this->isNullOrEmpty($GLOBALS['db']['db'])) {
 			die ("Database name is required for database connetion.\nPlease configure it in config/config.php file.\n");
-		}
-		if ($this->isNullOrEmpty($GLOBALS['db']['configFile'])) {
-			die ("Database configuration sql file is required for database initialization.\nPlease configure it in config/config.php file.\n");
 		}
 	}
 
