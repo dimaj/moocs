@@ -1,23 +1,15 @@
 <?php
-//include("Scraper.php");
-/*
-	This class is responsible for scraping class information
-	from Udacity.com
- * 
- */
- //test site: "http://rss.jobsearch.monster.com/rssquery.ashx?q=Web%20computer-science"
-//$job = simplexml_load_file('rssquery.xml');
-//print $job->channel->item[1]->title;
 class Monster  
 {
 	public $searchString;
 	public $site;
 	public $jobs;
-	public function __construct()
+	public function __construct($param)
 	{
+		$input_search = $param['input_search'];
 		//make the site into a string like:
 		//http://rss.jobsearch.monster.com/rssquery.ashx?q=Web%20<<<<<<$searchString>>>>>>>
-		$this->site = "http://rss.jobsearch.monster.com/rssquery.ashx?q=Web%20computer-science";
+		$this->site = "http://rss.jobsearch.monster.com/rssquery.ashx?q=${input_search}";
 		$this->jobs = simplexml_load_file($this->site);
 	}
 
@@ -29,33 +21,37 @@ class Monster
 		//array to hold job titles
 		$jobArray = array();
 		$amount = 5;
-		for($i = 0, $j = 0; $i < $amount; $i++)
+		for($i = 0, $j = 0; $j < $amount; $i++)
 		{
-			$title = $this->jobs->channel->item[$i]->title;
-			print $i . " " . $title . "\n";
-			
-			
-			//if the job title is already in the array, don't add it
-			//and add one to the amount of jobtitles being looked at
-			//DOESN'T TAKE CARE OF DUPLICATES YET FOR SOME REASON.
-			if(in_array($title, $jobArray))
-			{
-				$amount++;
-				print "duplicate: ". $title;
+			$record = $this->jobs->channel->item[$i];
+			$title = $record->title;
+
+			if (array_key_exists("$title", $jobArray)) {
+				continue;
 			}
-			else 
-			{
-				$jobArray[$j++] = $title;	
-			}	
+
+			$jobArray["$title"] = $record;
+			$j++;
 		}
-			$x = 1;
-			print "\n\nnow printing array:\n";
-			foreach ($jobArray as $jobTitles)
-			{
-				print $x++ . " " . $jobTitles . "\n";
-			}
+
+		return array_values($jobArray);
 	}
 }
-	$monster = new Monster;
-	$monster->getJobs();
+
+$API_VERSION = '0.0.1';
+
+$monster = new Monster($_REQUEST);
+
+$status = 0;
+$messages = array();
+$data = $monster->getJobs();
+
+$object = array(
+	'api_version' => $API_VERSION
+	, 'status' => $status
+	, 'messages' =>  $messages
+	, 'data' => $data
+	);
+
+print json_encode($object);
 ?>
