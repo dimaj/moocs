@@ -103,19 +103,6 @@ $(function() {
         return;    
     };
 
-    var search_for_courses = function () {
-        $.ajax({
-            type: 'GET',
-            url: 'search-for-courses.php',
-            dataType: 'json',
-            success: function(response) {
-                show_course_results({
-                    'course_list': response.data
-                });
-            }
-        });
-    };
-
     var populate_new_courses_ticker = function (param) {
         var target_node = param.node;
 
@@ -165,6 +152,76 @@ $(function() {
         });
     };
 
+    var populate_input_category = function (param) {
+        var target_node = param.node;
+
+        $.ajax({
+            type: 'GET'
+            , url: 'get-category-list.php'
+            , dataType: 'json'
+            , success: function(response) {
+                var category_list = response.data;
+                var input_select =
+                    $('<select />')
+                        .attr('name', 'category');
+
+                record = 
+                    $('<option />')
+                        .html('--')
+                        .val('')
+                        ;
+                        
+                input_select.append(record);
+
+                for (var i in category_list) {
+                    category = category_list[i];
+                    record = 
+                        $('<option />')
+                            .html(category)
+                            .val(category);
+                    input_select.append(record);
+                }
+
+                target_node.append(input_select);
+            }
+        });
+    };
+
+    var populate_input_site = function (param) {
+        var target_node = param.node;
+
+        $.ajax({
+            type: 'GET'
+            , url: 'get-site-list.php'
+            , dataType: 'json'
+            , success: function(response) {
+                var site_list = response.data;
+                var input_select =
+                    $('<select />')
+                        .attr('name', 'site');
+
+                record = 
+                    $('<option />')
+                        .html('--')
+                        .val('')
+                        ;
+
+                input_select.append(record);
+
+                for (var i in site_list) {
+                    site = site_list[i];
+                    record = 
+                        $('<option />')
+                            .html(site)
+                            .val(site);
+                    input_select.append(record);
+                }
+
+                target_node.append(input_select);
+            }
+        });
+    };
+
     $('#show_all_courses_button')
         .off('click')
         .click(function () {
@@ -189,6 +246,8 @@ $(function() {
             if (/^\s*$/.test(data['input_search'])) {
                 return;
             }
+
+            console.log(data);
 
             $.ajax({
                 'type': 'GET'
@@ -221,4 +280,11 @@ $(function() {
         'node' : $('div#trending_courses_ticker')
     });
 
+    populate_input_category({
+        'node' : $('div#input_category')
+    });
+
+    populate_input_site({
+        'node' : $('div#input_site')
+    });
 });

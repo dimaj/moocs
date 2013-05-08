@@ -359,17 +359,33 @@ class Database {
 		$unsafe_input_search = $param['input_search'];
 		$input_search = mysql_real_escape_string($unsafe_input_search);
 
+		$search_filter_array = array();
+
+		if ($param['category']) {
+			array_push($search_filter_array, "(category = '{$param['category']}')");
+		}
+
+		if ($param['site']) {
+			array_push($search_filter_array, "(site = '{$param['site']}')");
+		}
+
+		if (count($search_filter_array)) {
+			$search_filter = "AND" . join("AND", $search_filter_array);
+		}
+
 		$query = sprintf(
 			"SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
 			WHERE
-				MATCH (title, short_desc, long_desc)
+				(MATCH (title, short_desc, long_desc)
 					AGAINST ('%s')
 				OR MATCH (coursedetails.profname)
-					AGAINST ('%s')
+					AGAINST ('%s'))
+				%s
 			"
 			, $input_search
 			, $input_search
+			, $search_filter
 			);
 
 		try {
@@ -421,6 +437,50 @@ class Database {
 
 		while ($row = mysql_fetch_assoc($result)) {
 			array_push($data, $row);
+		}
+
+		return $data;
+	}
+
+	public function getSiteList ($param) {
+		$query = "
+			SELECT DISTINCT site FROM course_data
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row['site']);
+		}
+
+		return $data;
+	}
+
+	public function getCategoryList ($param) {
+		$query = "
+			SELECT DISTINCT category FROM course_data
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row['category']);
 		}
 
 		return $data;
