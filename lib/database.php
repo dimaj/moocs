@@ -362,8 +362,11 @@ class Database {
 		$query = sprintf(
 			"SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
-			WHERE MATCH (title, short_desc, long_desc)
-			AGAINST ('%s')
+			WHERE
+				MATCH (title, short_desc, long_desc)
+					AGAINST ('%s')
+				OR MATCH (coursedetails.profname)
+					AGAINST ('%s')
 			"
 			, $input_search
 			);
