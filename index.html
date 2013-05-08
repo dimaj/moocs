@@ -27,7 +27,7 @@
     </navigation>
 
 	<div class="container">
-        <div id="home_view">
+        <div id="home_view" class="row">
     		<div class="hero-unit">
     			<h1>Learning Nexus</h1>
     			<p>
@@ -59,8 +59,13 @@
     			<a href="admin.html" class="btn">admin</a>
     		</p>
     	</div>
-        <div id="search_results_view">
-            <table id="search_results_table" class="table table-striped table-hover"></table>
+        <div id="search_results_view" class="row hide">
+            <div class="span2">
+                <table id="job_results_table" class="table table-striped table-hover"></table>
+            </div>
+            <div class="span10">
+                <table id="search_results_table" class="table table-striped table-hover"></table>
+            </div>
         </div>
     </div>
 </body>
