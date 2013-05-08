@@ -74,7 +74,7 @@ $(function() {
             , url: 'get-type-ahead-data.php'
             , dataType: 'json'
             , success: function(response) {
-                console.log(response);
+//                console.log(response);
                 course_list = response.data;
                 process(course_list)
             }
@@ -162,9 +162,7 @@ $(function() {
     $('#search_form')
         .off('submit')
         .submit(function () {
-            console.log($('#search_form'));
             var data = $('#search_form').serialize();
-            console.log(data);
 
             $.ajax({
                 'type': 'GET'
