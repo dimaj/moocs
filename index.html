@@ -5,6 +5,7 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="assets/css/li-scroller.css" rel="stylesheet" />
+    <link href="assets/css/typeahead.js-bootstrap.css" rel="stylesheet" />
     <link href="css/default.css" rel="stylesheet" />
 </head>
 <body>
@@ -31,8 +32,8 @@
     		<div class="hero-unit">
     			<h1>Learning Nexus</h1>
     			<p>
-    				<form id="search_form" class="form-horizontal">
-    					<input id="input_search" name="input_search" type="search_field" class="input-medium search-query" />
+    				<form id="search_form" class="form-horizontal" autocomplete="off">
+    					<input id="input_search" name="input_search" type="text" class="tt-query" />
                         <div class="btn-group">
         					<button id="search_button" class="btn" type="submit" class="btn">Search</button>
         					<div id="advanced_search_button" class="btn">
@@ -73,6 +74,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/jquery.dataTables.min.js"></script>
 <script src="assets/js/jquery.li-scroller.1.0.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.9.0/typeahead.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.0.2/js/bootstrap-datepicker.min.js"></script>
 <script src="js/initialize.js"></script>
 </html>

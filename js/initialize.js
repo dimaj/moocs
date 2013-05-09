@@ -261,8 +261,11 @@ $(function() {
         });
 
     $('#input_search').typeahead({
-        source: function (query, process) {
-            get_course_search_data(process);
+        'prefetch': {
+            'url': 'get-type-ahead-data.php'
+            , 'filter': function (response) {
+                return response.data;
+            }
         }
     });
 
