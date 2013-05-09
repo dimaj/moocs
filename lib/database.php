@@ -356,11 +356,11 @@ class Database {
 			array_push($search_filter_array
 				, sprintf(
 					"(MATCH (title, short_desc, long_desc)
-						AGAINST ('%s')
+						AGAINST ('%s' IN BOOLEAN MODE)
 					OR MATCH (coursedetails.profname)
-						AGAINST ('%s'))"
-					, $input_search
-					, $input_search
+						AGAINST ('%s' IN BOOLEAN MODE))"
+					, $input_search . "*"
+					, $input_search . "*"
 					)
 				);
 		}
