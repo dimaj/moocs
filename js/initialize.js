@@ -47,17 +47,24 @@ $(function() {
             , bJQueryUI: false
             , bPaginate: false
             , aaData: course_list
+            , 'aaSorting': [[1, 'asc']]
             , aoColumns: [
-                {sTitle: 'Image', mData: function (source) {
-                    var image;
-                    image = '<img src="' + source.course_image + '" class="img-rounded" height="100" width="100">';
-                    return image;
-                }}
-                , {sTitle: 'Title', mData: function (source) {
-                    var title = source.title;
-                    var link = source.course_link;
-                    return '<a href=' + link + '>' + title + '</a>'
-                }}
+                {
+                    sTitle: 'Image'
+                    , mData: function (source) {
+                            var image;
+                            image = '<img src="' + source.course_image + '" class="img-rounded" height="100" width="100">';
+                            return image;
+                        }
+                }
+                , {
+                    sTitle: 'Title'
+                    , mData: function (source) {
+                            var title = source.title;
+                            var link = source.course_link;
+                            return '<a href=' + link + '>' + title + '</a>'
+                        }
+                }
                 , {sTitle: 'Category', mData: 'category'}
                 , {sTitle: 'Start Date', mData: 'start_date'}
                 , {sTitle: 'Course Length', mData: 'course_length'}
