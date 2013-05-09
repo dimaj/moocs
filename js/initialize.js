@@ -62,7 +62,7 @@ $(function() {
                     , mData: function (source) {
                             var title = source.title;
                             var link = source.course_link;
-                            return '<a href=' + link + '>' + title + '</a>'
+                            return '<a href=' + link + ' target="_blank">' + title + '</a>'
                         }
                 }
                 , {sTitle: 'Category', mData: 'category'}
