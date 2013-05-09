@@ -37,6 +37,18 @@ $(function() {
 
     };
 
+    var update_featured_course = function (param) {
+        console.log(param);
+        $.ajax({
+            type: 'POST'
+            , url: 'update-featured-course-data.php'
+            , dataType: 'json'
+            , success: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
     var show_course_results = function (param) {
 
         var course_list = param.course_list;
@@ -62,7 +74,7 @@ $(function() {
                     , mData: function (source) {
                             var title = source.title;
                             var link = source.course_link;
-                            return '<a href=' + link + ' target="_blank">' + title + '</a>'
+                            return '<a href=' + link + ' target="_blank">' + title + '</a>';
                         }
                 }
                 , {sTitle: 'Category', mData: 'category'}
@@ -74,6 +86,21 @@ $(function() {
                 }}
                 , {sTitle: 'Site', mData: 'site'}
             ]
+            , 'fnRowCallback':
+                function ( row, record, index, index_max ) {
+                    $('td:eq(1) a', row)
+                        .attr({
+                            'course_id': record.id
+                        })
+                        .off('click')
+                        .on('click',
+                            function () {
+                                update_featured_course({
+                                    'course_id': $(this).attr('course_id')
+                                })
+                            })
+                        ;
+                }
             , 'oLanguage': {
                  "sSearch": "Filter records:"
             }
@@ -99,7 +126,7 @@ $(function() {
                 {sTitle: 'Jobs', mData: function (source) {
                     var title = source.title;
                     var link = source.link;
-                    return '<a href=' + link + '>' + title + '</a>'
+                    return '<a href=' + link + ' target="_blank">' + title + '</a>'
                 }}
             ]
         });
@@ -107,10 +134,10 @@ $(function() {
 
     var show_all_courses = function () {
         $.ajax({
-            type: 'GET',
-            url: 'GetData.php',
-            dataType: 'json',
-            success: function(response) {
+            type: 'GET'
+            , url: 'GetData.php'
+            , dataType: 'json'
+            , success: function(response) {
                 show_course_results({
                     'course_list': response.data
                 });
@@ -118,15 +145,12 @@ $(function() {
         });
     };
 
-    var get_course_search_data = function (process) {
+    var get_course_search_data = function (course_id) {
         $.ajax({
             type: 'GET'
             , url: 'get-type-ahead-data.php'
-            , dataType: 'json'
-            , success: function(response) {
-//                console.log(response);
-                course_list = response.data;
-                process(course_list)
+            , data: {
+                'course_id': course_id
             }
         });
         
@@ -275,15 +299,12 @@ $(function() {
             e.preventDefault();
 
             var data = $('#search_form').serializeObject();
-            console.log(data);
 
             if (/^\s*$/.test(data['input_search'])
                 && /^\s*$/.test(data['category'])
                 && /^\s*$/.test(data['site'])) {
                 return;
             }
-
-            console.log(data);
 
             $.ajax({
                 'type': 'GET'
