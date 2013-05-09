@@ -51,6 +51,9 @@ abstract class Scraper {
 					continue;
 				}
 				
+				$category = $classInfo->getCategory();
+				$classInfo->setCategory(ucwords(strtolower($category))); //Camelcases cateogry
+
 				$id = $this->db->getClassID($classInfo);
 				if (!$id) {
 					// update database with current class's results
