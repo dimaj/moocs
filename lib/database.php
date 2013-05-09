@@ -13,8 +13,11 @@ class Database {
 		config.php file
 	*/
 	function __construct() {
-		$this->moocs = "config/moocs.sql";
-		$this->tracker = "config/course_meta.sql";
+		$this->tablesToSetup = array(
+			"config/moocs.sql"
+			, "config/course_meta.sql"
+			, "config/course_clicks.sql"
+		);
 		$this->checkConfig();
 		$this->connectDB();
 		if ($this->checkDB()) {
@@ -28,28 +31,18 @@ class Database {
 	*/
 	private function setupDB() {
 		$err;
-		// setup main DB
-		$sql = explode(";",file_get_contents(realpath($this->moocs)));
-		foreach ($sql as $query) {
-			$query = trim($query);
-			if (strlen($query) == 0) {
-				continue;
-			}
+		foreach ($this->tablesToSetup as $table) {
+			// setup table
+			$sql = explode(";",file_get_contents(realpath($table)));
+			foreach ($sql as $query) {
+				$query = trim($query);
+				if (strlen($query) == 0) {
+					continue;
+				}
 			
-			mysql_query($query)
-				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
-		}
-
-		// setup CourseTracker DB
-		$sql = explode(";",file_get_contents(realpath($this->tracker)));
-		foreach ($sql as $query) {
-			$query = trim($query);
-			if (strlen($query) == 0) {
-				continue;
+				mysql_query($query)
+					or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
 			}
-			
-			mysql_query($query)
-				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
 		}
 
 		$query = "ALTER TABLE `course_data` ENGINE = MYISAM";
@@ -411,8 +404,36 @@ class Database {
 		return $data;
 	}
 
+
+	public function updateFeaturedClass($class) {
+		$cid = $this->getClassID($class);
+		$selectQuery = "select count(*) from course_clicks where cid = ". $cid;
+		$insertQuery = "insert into course_clicks (`cid`, `numclicks`) values ('" . $cid . "', '1')";
+		$updateQuery = "update course_clicks set numclicks = numclicks + 1 where cid = " . $cid;
+		
+		// start executing queries
+		$err = null;
+		$results = $this->executeQuery($selectQuery, &$err);
+		$row = mysql_fetch_assoc($results);
+		if ($row && ($row['count(*)'] > 0)) {
+			// update
+			$this->executeQuery($updateQuery, &$err);
+		}
+		else {
+			// insert
+			$this->executeQuery($insertQuery, &$err);
+		}
+	}
+
 	public function getFeaturedClasses () {
+		$sql="select * from course_clicks join course_data on course_clicks.cid = course_data.id where course_clicks.numclicks > 0";
+
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
 		$data = array();
+		while ($row = mysql_fetch_assoc($results)) {
+			array_push($data, $row);
+		}
 
 		return $data;
 	}
