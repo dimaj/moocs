@@ -2,6 +2,8 @@
 require_once("config/config.php");
 require_once("lib/database.php");
 
+$API_VERSION = '0.0.1';
+
 $database = new Database();
 
 $status = 0;

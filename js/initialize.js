@@ -110,7 +110,6 @@ $(function() {
     };
 
     var show_job_results = function (param) {
-        console.log(param);
 
         var job_list = param.job_list;
         var target = $('#job_results_table');
@@ -315,7 +314,6 @@ $(function() {
                         show_course_results({
                             'course_list': response.data
                         });
-                        console.log(response);
                     }
             });
 
@@ -328,7 +326,6 @@ $(function() {
                         show_job_results({
                             'job_list': response.data
                         });
-                        console.log(response);
                     }
             });
             return;
