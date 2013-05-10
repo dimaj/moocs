@@ -439,11 +439,10 @@ class Database {
 	}
 
 	public function getClass ($param) {
-		if (! array_key_exists('class_id', $param)) {
+		if (! $param['course_id']) {
 			return NULL;
 		}
-
-		$unsafe_class_id = $param['class_id'];
+		$unsafe_class_id = $param['course_id'];
 		$class_id = mysql_real_escape_string($unsafe_class_id);
 
 		$query = "
