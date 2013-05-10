@@ -38,14 +38,10 @@ $(function() {
     };
 
     var update_featured_course = function (param) {
-        console.log(param);
         $.ajax({
             type: 'POST'
             , url: 'update-featured-course-data.php'
             , dataType: 'json'
-            , success: function(response) {
-                console.log(response);
-            }
         });
     }
 
@@ -144,12 +140,18 @@ $(function() {
         });
     };
 
-    var get_course_search_data = function (course_id) {
+    var get_course_data = function (param) {
         $.ajax({
             type: 'GET'
-            , url: 'get-type-ahead-data.php'
+            , url: 'get-course.php'
             , data: {
-                'course_id': course_id
+                'course_id': param.course_id
+            }
+            , dataType: 'json'
+            , 'success': function(response) {
+                show_course_results({
+                    'course_list': response.data
+                });
             }
         });
         
@@ -169,8 +171,23 @@ $(function() {
 
                 for (var i in course_list) {
                     course = course_list[i];
-                    record = $('<li />');
-                    record.html(course.title);
+                    record =
+                        $('<li />')
+                            .html(
+                                $('<a />')
+                                    .attr({
+                                        'course_id': course.id
+                                    })
+                                    .html(course.title)
+                                    .off('click')
+                                    .on('click',
+                                        function () {
+                                            get_course_data({
+                                                'course_id': $(this).attr('course_id')
+                                            })
+                                        })
+                                )
+                            ;
                     new_course_scroll.append(record);
                 }
 
@@ -195,7 +212,21 @@ $(function() {
                     course = course_list[i];
                     record = 
                         $('<li />')
-                            .html(course.title);
+                            .html(
+                                $('<a />')
+                                    .attr({
+                                        'course_id': course.id
+                                    })
+                                    .html(course.title)
+                                    .off('click')
+                                    .on('click',
+                                        function () {
+                                            get_course_data({
+                                                'course_id': $(this).attr('course_id')
+                                            })
+                                        })
+                                )
+                            ;
                     new_course_scroll.append(record);
                 }
 
