@@ -26,6 +26,7 @@ $(function() {
                 .end()
             .show();
 
+        $('#nav_search_form').show();
     };
 
     var show_home_view = function () {        
@@ -35,6 +36,7 @@ $(function() {
                 .end()
             .show();
 
+        $('#nav_search_form').hide();
     };
 
     var update_featured_course = function (param) {
@@ -329,6 +331,45 @@ $(function() {
             e.preventDefault();
 
             var data = $('#search_form').serializeObject();
+
+            if (/^\s*$/.test(data['input_search'])
+                && /^\s*$/.test(data['category'])
+                && /^\s*$/.test(data['site'])) {
+                return;
+            }
+
+            $.ajax({
+                'type': 'GET'
+                , 'url': 'search-for-courses.php'
+                , 'data': data
+                , 'dataType': 'json'
+                , 'success': function(response) {
+                        show_course_results({
+                            'course_list': response.data
+                        });
+                    }
+            });
+
+            $.ajax({
+                'type': 'GET'
+                , 'url': 'scrapers/MonsterScraper.php'
+                , 'data': data
+                , 'dataType': 'json'
+                , 'success': function(response) {
+                        show_job_results({
+                            'job_list': response.data
+                        });
+                    }
+            });
+            return;
+        });
+
+    $('#nav_search_form')
+        .off('submit')
+        .submit(function (e) {
+            e.preventDefault();
+
+            var data = $('#nav_search_form').serializeObject();
 
             if (/^\s*$/.test(data['input_search'])
                 && /^\s*$/.test(data['category'])
