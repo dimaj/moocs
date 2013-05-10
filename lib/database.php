@@ -405,8 +405,8 @@ class Database {
 	}
 
 
-	public function updateFeaturedClass($class) {
-		$cid = $this->getClassID($class);
+	public function updateFeaturedClass($param) {
+		$cid = mysql_real_escape_string($param['course_id']);
 		$selectQuery = "select count(*) from course_clicks where cid = ". $cid;
 		$insertQuery = "insert into course_clicks (`cid`, `numclicks`) values ('" . $cid . "', '1')";
 		$updateQuery = "update course_clicks set numclicks = numclicks + 1 where cid = " . $cid;
