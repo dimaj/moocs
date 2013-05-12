@@ -1,0 +1,33 @@
+<?php
+
+/* 
+ 	This is a configuration file for the project that
+ 	tells main project which scrapers to include, database info
+ 	and other global settings
+ */
+
+$GLOBALS['db'] = array(
+	"host" => "ip of the server, where mysql is installed"
+	, "port" => "3306"
+	, "user" => "username that has access to the database"
+	, "pass" => "password for that user"
+	, "db" => "name of the database, where data is stored"
+);
+
+$GLOBALS['newClassDuration'] = 14; // 2 weeks
+
+$GLOBALS['scrapers'] = array();
+
+$GLOBALS['scrapers']['canvas'] = array(
+	"className" => "Canvas"
+	, "mainURL" => "https://www.canvas.net"
+	, "mainSearchString" => "div[class=block-box no-pad featured-course-outer-container]"
+	, "name" => "Canvas"
+);
+
+$GLOBALS['scrapers']['udacity']  = array(
+	"className" => "Udacity"
+	, "mainURL" => "https://www.udacity.com/courses"
+	, "mainSearchString" => "ul[id=unfiltered-class-list] li"
+	, "name" => "Udacity"
+);
