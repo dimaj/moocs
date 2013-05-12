@@ -52,7 +52,7 @@ abstract class Scraper {
 				}
 				
 				$category = $classInfo->getCategory();
-				$classInfo->setCategory(ucwords(strtolower($category))); //Camelcases cateogry
+				$classInfo->setCategory(ucwords(strtolower($category))); //Camelcases category
 
 				$id = $this->db->getClassID($classInfo);
 				if (!$id) {
