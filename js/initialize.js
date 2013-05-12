@@ -43,7 +43,9 @@ $(function() {
         $.ajax({
             type: 'POST'
             , url: 'update-featured-course-data.php'
-            , dataType: 'json'
+            , data: {
+                'course_id': param.course_id
+                }
         });
     }
 
@@ -93,6 +95,7 @@ $(function() {
                         .off('click')
                         .on('click',
                             function () {
+                                console.log($(this).attr('course_id'));
                                 update_featured_course({
                                     'course_id': $(this).attr('course_id')
                                 })
