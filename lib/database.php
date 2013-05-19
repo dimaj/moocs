@@ -240,6 +240,12 @@ class Database {
 		$query = "
 			SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
+			UNION
+			SELECT * FROM g1_course_data
+			LEFT JOIN g1_coursedetails USING (id)
+			UNION
+			SELECT * FROM g3_course_data
+			LEFT JOIN g3_coursedetails USING (id)
 		";
 
 		try {
@@ -264,7 +270,13 @@ class Database {
 		$days = $GLOBALS['newClassDuration'];
 		$start = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday'] - $days);
 
-		$sql="select * from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}";
+		$sql="
+			select * from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}
+			UNION
+			select * from course_meta join g1_course_data on course_meta.cid = g1_course_data.id where course_meta.date >= {$start}
+			UNION
+			select * from course_meta join g3_course_data on course_meta.cid = g1_course_data.id where course_meta.date >= {$start}
+		";
 
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
@@ -278,7 +290,11 @@ class Database {
 	}
 
 	public function getClassID($course) {
-		$sql = "select id from course_data where title='" . $course->getTitle() . "'";
+		$sql = "select cd1.id, cd2.id, cd3.id from course_data cd2, g1_course_data cd1, g3_course_data cd3 
+			where 
+			cd1.title='" . $course->getTitle() . "' OR
+			cd2.title='" . $course->getTitle() . "' OR
+			cd3.title='" . $course->getTitle() . "'";
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
 		
@@ -290,7 +306,7 @@ class Database {
 	}
 	
 	public function getClassesIDs() {
-		$sql = "select id from course_data";
+		$sql = "select cd1.id, cd2.id, cd3.id from course_data cd2, g1_course_data.cd1, g3_course_data.cd3";
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
 		$ids = array();
@@ -328,7 +344,9 @@ class Database {
 	*/
 	public function getTypeAheadData() {
 		$query = "
-			SELECT title FROM course_data
+			SELECT title FROM course_data UNION
+			SELECT title FROM g1_course_data UNION
+			SELECT title FROM g3_course_data
 		";
 
 		try {			
@@ -380,8 +398,11 @@ class Database {
 		}
 
 		$query = sprintf(
-			"SELECT * FROM course_data
-			LEFT JOIN coursedetails USING (id)
+			"select * from (
+				select * from course_data left join coursedetails using (id) UNION
+				select * from g1_course_data left join g1_coursedetails using (id) union
+				select * from g3_course_data left join g3_coursedetails using (id)
+			) as Q1 
 			%s
 			"
 			, $search_filter
@@ -426,7 +447,11 @@ class Database {
 	}
 
 	public function getFeaturedClasses () {
-		$sql="select * from course_clicks join course_data on course_clicks.cid = course_data.id where course_clicks.numclicks > 0";
+		$sql="
+		select * from course_clicks join course_data on course_clicks.cid = course_data.id where course_clicks.numclicks > 0 UNION
+		select * from course_clicks join g1_course_data on course_clicks.cid = g1_course_data.id where course_clicks.numclicks > 0 UNION
+		select * from course_clicks join g3_course_data on course_clicks.cid = g3_course_data.id where course_clicks.numclicks > 0
+		";
 
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
@@ -448,6 +473,12 @@ class Database {
 		$query = "
 			SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
+			WHERE id = $class_id UNION
+			SELECT * FROM g1_course_data
+			LEFT JOIN g1_coursedetails USING (id)
+			WHERE id = $class_id UNION
+			SELECT * FROM g3_course_data
+			LEFT JOIN g3_coursedetails USING (id)
 			WHERE id = $class_id
 		";
 
@@ -470,7 +501,9 @@ class Database {
 
 	public function getSiteList ($param) {
 		$query = "
-			SELECT DISTINCT site FROM course_data
+			SELECT DISTINCT site from course_data UNION
+			SELECT DISTINCT site from g1_course_data UNION
+			SELECT DISTINCT site from g3_course_data
 		";
 
 		try {
@@ -492,7 +525,9 @@ class Database {
 
 	public function getCategoryList ($param) {
 		$query = "
-			SELECT DISTINCT category FROM course_data
+			SELECT DISTINCT category FROM course_data UNION
+			SELECT DISTINCT category FROM g1_course_data UNION
+			SELECT DISTINCT category FROM g3_course_data
 		";
 
 		try {
