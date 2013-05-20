@@ -13,6 +13,11 @@ class Database {
 		config.php file
 	*/
 	function __construct() {
+		$this->tablesToSetup = array(
+			"config/moocs.sql"
+			, "config/course_meta.sql"
+			, "config/course_clicks.sql"
+		);
 		$this->checkConfig();
 		$this->connectDB();
 		if ($this->checkDB()) {
@@ -26,29 +31,43 @@ class Database {
 	*/
 	private function setupDB() {
 		$err;
-		// setup main DB
-		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['configFile'])));
-		foreach ($sql as $query) {
-			$query = trim($query);
-			if (strlen($query) == 0) {
-				continue;
-			}
+		foreach ($this->tablesToSetup as $table) {
+			// setup table
+			$sql = explode(";",file_get_contents(realpath($table)));
+			foreach ($sql as $query) {
+				$query = trim($query);
+				if (strlen($query) == 0) {
+					continue;
+				}
 			
-			mysql_query($query)
-				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
+				mysql_query($query)
+					or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
+			}
 		}
 
-		// setup CourseTracker DB
-		$sql = explode(";",file_get_contents(realpath($GLOBALS['db']['courseTracker'])));
-		foreach ($sql as $query) {
-			$query = trim($query);
-			if (strlen($query) == 0) {
-				continue;
-			}
-			
-			mysql_query($query)
-				or die ("Error while executing query '" . $query . "'..." . mysql_error() . "\n");
-		}
+		$query = "ALTER TABLE `course_data` ENGINE = MYISAM";
+		mysql_query($query)
+			or die("Error updating table course_data engine");
+
+		$query = "ALTER TABLE `coursedetails` ENGINE = MYISAM";
+		mysql_query($query)
+			or die("Error updating table coursedetails engine");
+
+		$query =
+			"ALTER TABLE  `course_data` ADD FULLTEXT (
+				`title`
+				, `short_desc`
+				, `long_desc`
+			)";
+		mysql_query($query)
+			or die("Error adding course_data fulltext index");
+
+		$query =
+			"ALTER TABLE  `coursedetails` ADD FULLTEXT (
+				`profname`
+			)";
+		mysql_query($query)
+			or die("Error adding coursedetails index");
 	}
 	
 	/**
@@ -132,9 +151,6 @@ class Database {
 		}
 		if ($this->isNullOrEmpty($GLOBALS['db']['db'])) {
 			die ("Database name is required for database connetion.\nPlease configure it in config/config.php file.\n");
-		}
-		if ($this->isNullOrEmpty($GLOBALS['db']['configFile'])) {
-			die ("Database configuration sql file is required for database initialization.\nPlease configure it in config/config.php file.\n");
 		}
 	}
 
@@ -224,6 +240,12 @@ class Database {
 		$query = "
 			SELECT * FROM course_data
 			LEFT JOIN coursedetails USING (id)
+			UNION
+			SELECT * FROM g1_course_data
+			LEFT JOIN g1_coursedetails USING (id)
+			UNION
+			SELECT * FROM g3_course_data
+			LEFT JOIN g3_coursedetails USING (id)
 		";
 
 		try {
@@ -243,8 +265,36 @@ class Database {
 		return $data;
 	}
 
+	public function getNewClasses() {
+		$todayArr = getDate();
+		$days = $GLOBALS['newClassDuration'];
+		$start = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday'] - $days);
+
+		$sql="
+			select * from course_meta join course_data on course_meta.cid = course_data.id where course_meta.date >= {$start}
+			UNION
+			select * from course_meta join g1_course_data on course_meta.cid = g1_course_data.id where course_meta.date >= {$start}
+			UNION
+			select * from course_meta join g3_course_data on course_meta.cid = g3_course_data.id where course_meta.date >= {$start}
+		";
+
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
+		$data = array();
+		while ($row = mysql_fetch_assoc($results)) {
+			array_push($data, $row);
+		}
+		
+		return $data;
+		
+	}
+
 	public function getClassID($course) {
-		$sql = "select id from course_data where title='" . $course->getTitle() . "'";
+		$sql = "select cd1.id, cd2.id, cd3.id from course_data cd2, g1_course_data cd1, g3_course_data cd3 
+			where 
+			cd1.title='" . $course->getTitle() . "' OR
+			cd2.title='" . $course->getTitle() . "' OR
+			cd3.title='" . $course->getTitle() . "'";
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
 		
@@ -256,7 +306,7 @@ class Database {
 	}
 	
 	public function getClassesIDs() {
-		$sql = "select id from course_data";
+		$sql = "select cd1.id, cd2.id, cd3.id from course_data cd2, g1_course_data.cd1, g3_course_data.cd3";
 		$err = null;
 		$results = $this->executeQuery($sql, &$err);
 		$ids = array();
@@ -279,7 +329,6 @@ class Database {
 	}
 	
 	public function updateMetadata($class) {
-		print "I am here\n";
 		$todayArr = getDate();
 		$date = sprintf("%4d-%02d-%02d", $todayArr['year'], $todayArr['mon'], $todayArr['mday']);
 		$err = null;
@@ -295,7 +344,9 @@ class Database {
 	*/
 	public function getTypeAheadData() {
 		$query = "
-			SELECT title FROM course_data
+			SELECT title FROM course_data UNION
+			SELECT title FROM g1_course_data UNION
+			SELECT title FROM g3_course_data
 		";
 
 		try {			
@@ -309,7 +360,200 @@ class Database {
 		$data = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
-			array_push($data, $row['title']);
+			$title = iconv('UTF-8', 'UTF-8//IGNORE', $row['title']);
+			array_push($data, $title);
+		}
+
+		return $data;
+	}
+
+	public function searchForClasses ($param) {
+		$search_filter_array = array();
+
+		if ($param['input_search']) {
+			$input_search = mysql_real_escape_string($param['input_search']);
+			array_push($search_filter_array
+				, sprintf(
+					"(MATCH (title, short_desc, long_desc)
+						AGAINST ('%s' IN BOOLEAN MODE)
+					OR MATCH (profname)
+						AGAINST ('%s' IN BOOLEAN MODE))"
+					, $input_search . "*"
+					, $input_search . "*"
+					)
+				);
+		}
+
+		if ($param['category']) {
+			$category = mysql_real_escape_string($param['category']);
+			array_push($search_filter_array, "(category = '{$category}')");
+		}
+
+		if ($param['site']) {
+			$site = mysql_real_escape_string($param['site']);
+			array_push($search_filter_array, "(site = '{$site}')");
+		}
+
+		if (count($search_filter_array)) {
+			$search_filter = "WHERE" . join("AND", $search_filter_array);
+		}
+
+		$query = sprintf(
+			"
+				select * 
+					from course_data
+					left join coursedetails using (id)
+					%s
+				UNION
+				select *
+					from g1_course_data
+					left join g1_coursedetails using (id)
+					%s
+				union
+				select * 
+					from g3_course_data
+					left join g3_coursedetails using (id)
+					%s
+			"
+			, $search_filter
+			, $search_filter
+			, $search_filter
+			);
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row);
+		}
+
+		return $data;
+	}
+
+
+	public function updateFeaturedClass($param) {
+		$cid = mysql_real_escape_string($param['course_id']);
+		$selectQuery = "select count(*) from course_clicks where cid = ". $cid;
+		$insertQuery = "insert into course_clicks (`cid`, `numclicks`) values ('" . $cid . "', '1')";
+		$updateQuery = "update course_clicks set numclicks = numclicks + 1 where cid = " . $cid;
+		
+		// start executing queries
+		$err = null;
+		$results = $this->executeQuery($selectQuery, &$err);
+		$row = mysql_fetch_assoc($results);
+		if ($row && ($row['count(*)'] > 0)) {
+			// update
+			$this->executeQuery($updateQuery, &$err);
+		}
+		else {
+			// insert
+			$this->executeQuery($insertQuery, &$err);
+		}
+	}
+
+	public function getFeaturedClasses () {
+		$sql="
+		select * from course_clicks join course_data on course_clicks.cid = course_data.id where course_clicks.numclicks > 0 UNION
+		select * from course_clicks join g1_course_data on course_clicks.cid = g1_course_data.id where course_clicks.numclicks > 0 UNION
+		select * from course_clicks join g3_course_data on course_clicks.cid = g3_course_data.id where course_clicks.numclicks > 0
+		";
+
+		$err = null;
+		$results = $this->executeQuery($sql, &$err);
+		$data = array();
+		while ($row = mysql_fetch_assoc($results)) {
+			array_push($data, $row);
+		}
+
+		return $data;
+	}
+
+	public function getClass ($param) {
+		if (! $param['course_id']) {
+			return NULL;
+		}
+		$unsafe_class_id = $param['course_id'];
+		$class_id = mysql_real_escape_string($unsafe_class_id);
+
+		$query = "
+			SELECT * FROM course_data
+			LEFT JOIN coursedetails USING (id)
+			WHERE id = $class_id UNION
+			SELECT * FROM g1_course_data
+			LEFT JOIN g1_coursedetails USING (id)
+			WHERE id = $class_id UNION
+			SELECT * FROM g3_course_data
+			LEFT JOIN g3_coursedetails USING (id)
+			WHERE id = $class_id
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row);
+		}
+
+		return $data;
+	}
+
+	public function getSiteList ($param) {
+		$query = "
+			SELECT DISTINCT site from course_data UNION
+			SELECT DISTINCT site from g1_course_data UNION
+			SELECT DISTINCT site from g3_course_data
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row['site']);
+		}
+
+		return $data;
+	}
+
+	public function getCategoryList ($param) {
+		$query = "
+			SELECT DISTINCT category FROM course_data UNION
+			SELECT DISTINCT category FROM g1_course_data UNION
+			SELECT DISTINCT category FROM g3_course_data
+		";
+
+		try {
+			$result = mysql_query($query);
+		}
+		catch (MySQLException $err) {
+		    $err->getMessage();
+			echo $err;
+		}
+		
+		$data = array();
+
+		while ($row = mysql_fetch_assoc($result)) {
+			array_push($data, $row['category']);
 		}
 
 		return $data;

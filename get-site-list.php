@@ -8,7 +8,7 @@ $database = new Database();
 
 $status = 0;
 $messages = array();
-$data = $database->searchForClasses($_REQUEST);
+$data = $database->getSiteList();
 
 $object = array(
 	'api_version' => $API_VERSION
