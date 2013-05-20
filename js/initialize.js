@@ -57,7 +57,7 @@ $(function() {
         target.dataTable({
             bDestroy: true
             , bJQueryUI: false
-            , bPaginate: false
+            , bPaginate: true
             , aaData: course_list
             , 'aaSorting': [[1, 'asc']]
             , aoColumns: [
