@@ -402,17 +402,21 @@ class Database {
 			"
 				select * 
 					from course_data
-					left join coursedetails using (id) 
+					left join coursedetails using (id)
+					%s
 				UNION
 				select *
 					from g1_course_data
 					left join g1_coursedetails using (id)
+					%s
 				union
 				select * 
 					from g3_course_data
 					left join g3_coursedetails using (id)
-				%s
+					%s
 			"
+			, $search_filter
+			, $search_filter
 			, $search_filter
 			);
 
