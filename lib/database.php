@@ -275,7 +275,7 @@ class Database {
 			UNION
 			select * from course_meta join g1_course_data on course_meta.cid = g1_course_data.id where course_meta.date >= {$start}
 			UNION
-			select * from course_meta join g3_course_data on course_meta.cid = g1_course_data.id where course_meta.date >= {$start}
+			select * from course_meta join g3_course_data on course_meta.cid = g3_course_data.id where course_meta.date >= {$start}
 		";
 
 		$err = null;
@@ -360,7 +360,8 @@ class Database {
 		$data = array();
 
 		while ($row = mysql_fetch_assoc($result)) {
-			array_push($data, $row['title']);
+			$title = iconv('UTF-8', 'UTF-8//IGNORE', $row['title']);
+			array_push($data, $title);
 		}
 
 		return $data;
@@ -375,7 +376,7 @@ class Database {
 				, sprintf(
 					"(MATCH (title, short_desc, long_desc)
 						AGAINST ('%s' IN BOOLEAN MODE)
-					OR MATCH (coursedetails.profname)
+					OR MATCH (profname)
 						AGAINST ('%s' IN BOOLEAN MODE))"
 					, $input_search . "*"
 					, $input_search . "*"
@@ -398,12 +399,19 @@ class Database {
 		}
 
 		$query = sprintf(
-			"select * from (
-				select * from course_data left join coursedetails using (id) UNION
-				select * from g1_course_data left join g1_coursedetails using (id) union
-				select * from g3_course_data left join g3_coursedetails using (id)
-			) as Q1 
-			%s
+			"
+				select * 
+					from course_data
+					left join coursedetails using (id) 
+				UNION
+				select *
+					from g1_course_data
+					left join g1_coursedetails using (id)
+				union
+				select * 
+					from g3_course_data
+					left join g3_coursedetails using (id)
+				%s
 			"
 			, $search_filter
 			);
